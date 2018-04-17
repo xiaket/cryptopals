@@ -1,0 +1,30 @@
+#!/bin/bash
+
+set -o errexit
+set -o nounset
+set -o pipefail
+
+
+# define tasks here
+get_current_job (){
+  find . -name "*.go" | sort | tail -n 1
+}
+
+run () {
+  current=$(get_current_job)
+  go run $current
+}
+
+# main start here
+command=${1:-""}
+
+if [ -n "$(type -t $command)" ] && [ "$(type -t $command)" = function ]
+then
+  eval $command
+  exit $?
+fi
+
+case "$command" in
+  *)
+    run
+esac
