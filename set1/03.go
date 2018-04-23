@@ -35,11 +35,10 @@ var frequency = map[byte]float64{
 
 func main() {
 	const message = "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736"
-	const suspects = "abcdefghijklmnopqrstuvwxyz"
 	unhexed, _ := hex.DecodeString(message)
 
 	dst := make([]byte, len(unhexed))
-	for _, suspect := range suspects {
+	for suspect := 32; suspect < 128; suspect++ {
 		safeXORBytes(dst, unhexed, byte(suspect))
 		decoded := string(dst)
 		rating := calc_rating(decoded)
@@ -53,8 +52,12 @@ func main() {
 func calc_rating(msg string) float64 {
 	rating := 0.0
 	for _, ch := range msg {
-		lowered_character := []byte(strings.ToLower(string(ch)))[0]
-		rating += frequency[lowered_character]
+		if ch < 32 && ch > 0 {
+			rating -= 0.1
+		} else {
+			lowered_character := []byte(strings.ToLower(string(ch)))[0]
+			rating += frequency[lowered_character]
+		}
 	}
 	return rating
 }
