@@ -10,7 +10,7 @@ func main() {
 
 	dst := make([]byte, len(unhexed))
 	for suspect := 32; suspect < 128; suspect++ {
-		cryptopals.SafeXORBytes(dst, unhexed, byte(suspect))
+		cryptopals.SafeXORByte(dst, unhexed, byte(suspect))
 		decoded := string(dst)
 		rating := cryptopals.CalcRating(decoded)
 		if rating > 1.0 {

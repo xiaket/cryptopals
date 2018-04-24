@@ -44,10 +44,18 @@ func CalcRating(msg string) float64 {
 	return rating
 }
 
-func SafeXORBytes(dst []byte, a []byte, b byte) int {
+func SafeXORByte(dst []byte, a []byte, b byte) int {
 	n := len(a)
 	for i := 0; i < n; i++ {
 		dst[i] = a[i] ^ b
+	}
+	return n
+}
+
+func SafeXORBytes(dst, a, b []byte) int {
+	n := len(a)
+	for i := 0; i < n; i++ {
+		dst[i] = a[i] ^ b[i%len(b)]
 	}
 	return n
 }
