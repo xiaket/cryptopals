@@ -1,5 +1,6 @@
 package cryptopals
 
+import "strconv"
 import "strings"
 
 var frequency = map[byte]float64{
@@ -58,4 +59,26 @@ func SafeXORBytes(dst, a, b []byte) int {
 		dst[i] = a[i] ^ b[i%len(b)]
 	}
 	return n
+}
+
+func msg2bin(msg string) string {
+	bin_ := ""
+	for _, byte_ := range []byte(msg) {
+		converted := strconv.FormatInt(int64(byte_), 2)
+		converted = strings.Repeat("0", 8-len(converted)) + converted
+		bin_ += converted
+	}
+	return bin_
+}
+
+func HammingDistance(message1, message2 string) int {
+	bin1 := msg2bin(message1)
+	bin2 := msg2bin(message2)
+	counts := 0
+	for i, ch := range bin1 {
+		if byte(ch) != bin2[i] {
+			counts += 1
+		}
+	}
+	return counts
 }
