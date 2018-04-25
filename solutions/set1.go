@@ -8,8 +8,7 @@ import "log"
 import "os"
 import "../lib"
 
-func Prob1() {
-	const hex_string = "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d"
+func Prob1(hex_string string) string {
 	src := []byte(hex_string)
 	dst := make([]byte, hex.DecodedLen(len(src)))
 	_, err := hex.Decode(dst, src)
@@ -17,7 +16,7 @@ func Prob1() {
 		log.Fatal(err)
 	}
 	encoded := base64.StdEncoding.EncodeToString(dst)
-	fmt.Println(encoded)
+	return encoded
 }
 
 func Prob2() {
