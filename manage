@@ -7,12 +7,12 @@ set -o pipefail
 
 # define tasks here
 get_current_job (){
-  find . -name "*.go" | sort | tail -n 1
+  cat solutions/registry.go | grep Prob | tail -n 1 | sed "s/://g" | awk '{print $1}'
 }
 
 run () {
   current=$(get_current_job)
-  go run $current
+  go run Manager.go $current
 }
 
 less_ () {
