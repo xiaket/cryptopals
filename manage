@@ -16,7 +16,7 @@ run () {
 }
 
 test_ () {
-  go run Manager.go test
+  go test ./lib
 }
 
 less_ () {

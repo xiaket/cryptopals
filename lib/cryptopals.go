@@ -1,6 +1,9 @@
 package cryptopals
 
+import "encoding/hex"
+import "encoding/base64"
 import "errors"
+import "log"
 import "reflect"
 import "strconv"
 import "strings"
@@ -33,6 +36,7 @@ var frequency = map[byte]float64{
 	'y': 0.01974,
 	'z': 0.00074,
 }
+var ErrParamsNotAdapted = errors.New("The number of params is not adapted.")
 
 func CalcRating(msg string) float64 {
 	rating := 0.0
@@ -73,6 +77,13 @@ func msg2bin(msg string) string {
 	return bin_
 }
 
+func DecodeHex(msg string) []byte {
+	src := []byte(msg)
+	bin := make([]byte, hex.DecodedLen(len(src)))
+	hex.Decode(bin, src)
+	return bin
+}
+
 func HammingDistance(message1, message2 string) int {
 	bin1 := msg2bin(message1)
 	bin2 := msg2bin(message2)
@@ -85,14 +96,25 @@ func HammingDistance(message1, message2 string) int {
 	return counts
 }
 
-var (
-	ErrParamsNotAdapted = errors.New("The number of params is not adapted.")
-)
+func HexToBase64(hex_string string) string {
+	src := []byte(hex_string)
+	dst := make([]byte, hex.DecodedLen(len(src)))
+	_, err := hex.Decode(dst, src)
+	if err != nil {
+		log.Fatal(err)
+	}
+	encoded := base64.StdEncoding.EncodeToString(dst)
+	return encoded
+}
 
 type Funcs map[string]reflect.Value
 
-func NewFuncs(size int) Funcs {
-	return make(Funcs, size)
+func NewFuncs(size int, mapper map[string]interface{}) Funcs {
+	funcs := make(Funcs, size)
+	for key, value := range mapper {
+		funcs.Bind(key, value)
+	}
+	return funcs
 }
 
 func (f Funcs) Bind(name string, fn interface{}) (err error) {

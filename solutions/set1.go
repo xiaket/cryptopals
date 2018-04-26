@@ -2,39 +2,28 @@ package solutions
 
 import "bufio"
 import "encoding/hex"
-import "encoding/base64"
 import "fmt"
-import "log"
 import "os"
 import "../lib"
 
-func Prob1(hex_string string) string {
-	src := []byte(hex_string)
-	dst := make([]byte, hex.DecodedLen(len(src)))
-	_, err := hex.Decode(dst, src)
-	if err != nil {
-		log.Fatal(err)
-	}
-	encoded := base64.StdEncoding.EncodeToString(dst)
-	return encoded
+func Prob1() {
+	const hex_string = "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d"
+	encoded := cryptopals.HexToBase64(hex_string)
+	fmt.Println(encoded)
 }
 
 func Prob2() {
 	const msg1 = "1c0111001f010100061a024b53535009181c"
 	const msg2 = "686974207468652062756c6c277320657965"
-	bin1 := to_bin(msg1)
-	bin2 := to_bin(msg2)
+	bin1 := cryptopals.DecodeHex(msg1)
+	bin2 := cryptopals.DecodeHex(msg2)
+	fmt.Println(bin1)
+	fmt.Println(bin2)
+
 	dst := make([]byte, len(bin1))
 	cryptopals.SafeXORBytes(dst, bin1, bin2)
 	encodedStr := hex.EncodeToString(dst)
 	fmt.Println(encodedStr)
-}
-
-func to_bin(msg string) []byte {
-	src := []byte(msg)
-	bin := make([]byte, hex.DecodedLen(len(src)))
-	hex.Decode(bin, src)
-	return bin
 }
 
 func Prob3() {
