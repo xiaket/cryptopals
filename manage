@@ -25,6 +25,10 @@ less_ () {
   less $doc_name
 }
 
+list () {
+  grep "() {" $0 | grep -v 'grep ' | awk '{print $1}' | sort
+}
+
 # main start here
 command=${1:-""}
 
@@ -37,6 +41,8 @@ fi
 case "$command" in
   l)
     less_;;
+  ls)
+    list;;
   test)
     test_;;
   *)
