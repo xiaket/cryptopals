@@ -31,15 +31,18 @@ func Prob3() {
 	unhexed, _ := hex.DecodeString(message)
 
 	dst := make([]byte, len(unhexed))
+	max := 1.0
+	best_guess := ""
 	for suspect := 32; suspect < 128; suspect++ {
 		cryptopals.SafeXORByte(dst, unhexed, byte(suspect))
 		decoded := string(dst)
 		rating := cryptopals.CalcRating(decoded)
-		if rating > 1.0 {
-			fmt.Println(suspect, dst, rating, decoded)
+		if rating > max {
+			best_guess = decoded
+			max = rating
 		}
 	}
-	// hand picked result: cOOKINGmcSLIKEAPOUNDOFBACON
+	fmt.Println(max, best_guess)
 }
 
 func Prob4() {
