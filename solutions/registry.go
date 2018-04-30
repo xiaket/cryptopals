@@ -1,9 +1,7 @@
 package solutions
 
-import "../lib"
-
 var (
-	mapper = map[string]interface{}{
+	Registry = map[string]func(){
 		"1": Prob1,
 		"2": Prob2,
 		"3": Prob3,
@@ -11,5 +9,4 @@ var (
 		"5": Prob5,
 		"6": Prob6,
 	}
-	Registry = cryptopals.NewFuncs(64, mapper)
 )

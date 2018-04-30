@@ -2,9 +2,7 @@ package cryptopals
 
 import "encoding/hex"
 import "encoding/base64"
-import "errors"
 import "log"
-import "reflect"
 import "strconv"
 import "strings"
 
@@ -36,7 +34,6 @@ var frequency = map[byte]float64{
 	'y': 0.01974,
 	'z': 0.00074,
 }
-var ErrParamsNotAdapted = errors.New("The number of params is not adapted.")
 
 func CalcRating(msg string) float64 {
 	rating := 0.0
@@ -105,43 +102,4 @@ func HexToBase64(hex_string string) string {
 	}
 	encoded := base64.StdEncoding.EncodeToString(dst)
 	return encoded
-}
-
-type Funcs map[string]reflect.Value
-
-func NewFuncs(size int, mapper map[string]interface{}) Funcs {
-	funcs := make(Funcs, size)
-	for key, value := range mapper {
-		funcs.Bind(key, value)
-	}
-	return funcs
-}
-
-func (f Funcs) Bind(name string, fn interface{}) (err error) {
-	defer func() {
-		if e := recover(); e != nil {
-			err = errors.New(name + " is not callable.")
-		}
-	}()
-	v := reflect.ValueOf(fn)
-	v.Type().NumIn()
-	f[name] = v
-	return
-}
-
-func (f Funcs) Call(name string, params ...interface{}) (result []reflect.Value, err error) {
-	if _, ok := f[name]; !ok {
-		err = errors.New(name + " does not exist.")
-		return
-	}
-	if len(params) != f[name].Type().NumIn() {
-		err = ErrParamsNotAdapted
-		return
-	}
-	in := make([]reflect.Value, len(params))
-	for k, param := range params {
-		in[k] = reflect.ValueOf(param)
-	}
-	result = f[name].Call(in)
-	return
 }

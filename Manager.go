@@ -4,5 +4,5 @@ import "os"
 import "./solutions"
 
 func main() {
-	solutions.Registry.Call(os.Args[1])
+	solutions.Registry[os.Args[1]]()
 }
