@@ -4,6 +4,7 @@ import "bufio"
 import "encoding/hex"
 import "fmt"
 import "os"
+import "path/filepath"
 import "../lib"
 
 func Prob1() {
@@ -42,15 +43,17 @@ func Prob3() {
 			max = rating
 		}
 	}
-	fmt.Println(max, best_guess)
+	fmt.Println(best_guess)
 }
 
 func Prob4() {
-	inFile, _ := os.Open("file.04.txt")
+	_, git_root := cryptopals.GitRootDir()
+	inFile, _ := os.Open(filepath.Join(git_root, "solutions", "file.04.txt"))
 	defer inFile.Close()
 	scanner := bufio.NewScanner(inFile)
 	scanner.Split(bufio.ScanLines)
 	max := 1.0
+	best_guess := ""
 
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -62,10 +65,11 @@ func Prob4() {
 			rating := cryptopals.CalcRating(decoded)
 			if rating > max {
 				max = rating
-				fmt.Println(rating, suspect, decoded)
+				best_guess = decoded
 			}
 		}
 	}
+	fmt.Println(best_guess)
 }
 
 func Prob5() {

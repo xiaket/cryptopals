@@ -3,6 +3,8 @@ package cryptopals
 import "encoding/hex"
 import "encoding/base64"
 import "log"
+import "os"
+import "path/filepath"
 import "strconv"
 import "strings"
 
@@ -82,6 +84,17 @@ func msg2bin(msg string) string {
 		bin_ += converted
 	}
 	return bin_
+}
+
+func GitRootDir() (bool, string) {
+	dir, _ := filepath.Abs(".")
+	for dir != "/" {
+		if _, err := os.Stat(filepath.Join(dir, "/.git")); err == nil {
+			return true, dir
+		}
+		dir = filepath.Dir(dir)
+	}
+	return false, ""
 }
 
 func DecodeHex(msg string) []byte {
