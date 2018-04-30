@@ -22,7 +22,7 @@ func Prob2() {
 	fmt.Println(bin2)
 
 	dst := make([]byte, len(bin1))
-	cryptopals.SafeXORBytes(dst, bin1, bin2)
+	cryptopals.XORBytes(dst, bin1, bin2)
 	encodedStr := hex.EncodeToString(dst)
 	fmt.Println(encodedStr)
 }
@@ -35,7 +35,7 @@ func Prob3() {
 	max := 1.0
 	best_guess := ""
 	for suspect := 32; suspect < 128; suspect++ {
-		cryptopals.SafeXORByte(dst, unhexed, byte(suspect))
+		cryptopals.XORByte(dst, unhexed, byte(suspect))
 		decoded := string(dst)
 		rating := cryptopals.CalcRating(decoded)
 		if rating > max {
@@ -60,7 +60,7 @@ func Prob4() {
 		unhexed, _ := hex.DecodeString(line)
 		dst := make([]byte, len(unhexed))
 		for suspect := 32; suspect < 128; suspect++ {
-			cryptopals.SafeXORByte(dst, unhexed, byte(suspect))
+			cryptopals.XORByte(dst, unhexed, byte(suspect))
 			decoded := string(dst)
 			rating := cryptopals.CalcRating(decoded)
 			if rating > max {
@@ -76,7 +76,7 @@ func Prob5() {
 	const message = "Burning 'em, if you ain't quick and nimble I go crazy when I hear a cymbal"
 	const key = "ICE"
 	xored := make([]byte, len(message))
-	cryptopals.SafeXORBytes(xored, []byte(message), []byte(key))
+	cryptopals.XORBytes(xored, []byte(message), []byte(key))
 	encodedStr := hex.EncodeToString(xored)
 	fmt.Println(encodedStr)
 }
