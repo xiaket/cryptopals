@@ -2,6 +2,7 @@
 // of cryptopals problems.
 package cryptopals
 
+import "bufio"
 import "encoding/hex"
 import "encoding/base64"
 import "os"
@@ -129,4 +130,18 @@ func HexToBase64(hex_string string) string {
 	bin := DecodeHex(hex_string)
 	encoded := base64.StdEncoding.EncodeToString(bin)
 	return encoded
+}
+
+func OpenFile(number string) []string {
+	_, git_root := GitRootDir()
+	inFile, _ := os.Open(filepath.Join(git_root, "solutions", "file."+number+".txt"))
+	defer inFile.Close()
+	scanner := bufio.NewScanner(inFile)
+	scanner.Split(bufio.ScanLines)
+	var content []string
+
+	for scanner.Scan() {
+		content = append(content, scanner.Text())
+	}
+	return content
 }

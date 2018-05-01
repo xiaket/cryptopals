@@ -1,10 +1,7 @@
 package solutions
 
-import "bufio"
 import "encoding/hex"
 import "fmt"
-import "os"
-import "path/filepath"
 import "strings"
 import "../lib"
 
@@ -63,16 +60,11 @@ func Prob4() {
 }
 
 func prob4() string {
-	_, git_root := cryptopals.GitRootDir()
-	inFile, _ := os.Open(filepath.Join(git_root, "solutions", "file.04.txt"))
-	defer inFile.Close()
-	scanner := bufio.NewScanner(inFile)
-	scanner.Split(bufio.ScanLines)
+	content := cryptopals.OpenFile("04")
 	max := 1.0
 	best_guess := ""
 
-	for scanner.Scan() {
-		line := scanner.Text()
+	for _, line := range content {
 		unhexed, _ := hex.DecodeString(line)
 		dst := make([]byte, len(unhexed))
 		for suspect := 32; suspect < 128; suspect++ {
@@ -102,8 +94,6 @@ func prob5(message, key string) string {
 }
 
 func Prob6() {
-	const message1 = "this is a test"
-	const message2 = "wokka wokka!!!"
-	hamming_distance := cryptopals.HammingDistance(message1, message2)
-	fmt.Println(hamming_distance)
+	content := strings.Join(cryptopals.OpenFile("06"), "")
+	fmt.Println(content)
 }
