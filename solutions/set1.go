@@ -1,5 +1,6 @@
 package solutions
 
+import "crypto/aes"
 import "encoding/base64"
 import "encoding/hex"
 import "fmt"
@@ -141,4 +142,21 @@ func prob6() (string, string) {
 func Prob6() {
 	encryption_key, _ := prob6()
 	fmt.Println(encryption_key)
+}
+
+func prob7(key string, block_size int) string {
+	content := strings.Join(cryptopals.OpenFile("07"), "")
+	cipher, _ := aes.NewCipher([]byte(key))
+	cipherText, _ := base64.StdEncoding.DecodeString(content)
+	decrypted := make([]byte, len(cipherText))
+
+	for bs, be := 0, block_size; bs < len(cipherText); bs, be = bs+block_size, be+block_size {
+		cipher.Decrypt(decrypted[bs:be], cipherText[bs:be])
+	}
+	return string(decrypted)
+}
+
+func Prob7() {
+	decrypted := prob7("YELLOW SUBMARINE", 16)
+	fmt.Println(string(decrypted))
 }

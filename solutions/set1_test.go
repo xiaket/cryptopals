@@ -1,5 +1,6 @@
 package solutions
 
+import "strings"
 import "testing"
 
 func TestProb2(test *testing.T) {
@@ -30,10 +31,29 @@ func TestProb5(test *testing.T) {
 	}
 }
 
+func verifyPrefixAndLength(str string, prefix string, length int, test *testing.T) {
+	if !strings.HasPrefix(str, prefix) {
+		test.Errorf("Incorrect result: prefix %s, want: %s.", str[:len(prefix)], prefix)
+	}
+	if len(str) != length {
+		test.Errorf("Incorrect result: length %d, want: %d.", len(str), length)
+	}
+}
+
 func TestProb6(test *testing.T) {
 	const expected = "Terminator X: Bring the noise"
-	guess, _ := prob6()
+	const prefix = "I'm back and I'm ringin' the bell"
+	const length = 2876
+	guess, decoded := prob6()
 	if guess != expected {
 		test.Errorf("Incorrect key: %s, want: %s.", guess, expected)
 	}
+	verifyPrefixAndLength(decoded, prefix, length, test)
+}
+
+func TestProb7(test *testing.T) {
+	const prefix = "I'm back and I'm ringin' the bell"
+	const length = 2880
+	decrypted := prob7("YELLOW SUBMARINE", 16)
+	verifyPrefixAndLength(decrypted, prefix, length, test)
 }
