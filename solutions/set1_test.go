@@ -12,15 +12,6 @@ func TestProb2(test *testing.T) {
 	}
 }
 
-func TestProb3(test *testing.T) {
-	const message = "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736"
-	const expected = "Cooking MC's like a pound of bacon"
-	guess := prob3(message)
-	if guess != expected {
-		test.Errorf("Incorrect guess result: %s, want: %s.", guess, expected)
-	}
-}
-
 func TestProb4(test *testing.T) {
 	const expected = "Now that the party is jumping"
 	guess := prob4()
@@ -36,5 +27,13 @@ func TestProb5(test *testing.T) {
 	encoded := prob5(message, key)
 	if encoded != expected {
 		test.Errorf("Incorrect encoded result: %s, want: %s.", encoded, expected)
+	}
+}
+
+func TestProb6(test *testing.T) {
+	const expected = "Terminator X: Bring the noise"
+	guess, _ := prob6()
+	if guess != expected {
+		test.Errorf("Incorrect key: %s, want: %s.", guess, expected)
 	}
 }

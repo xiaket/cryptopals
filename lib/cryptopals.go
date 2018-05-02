@@ -12,7 +12,7 @@ import "strings"
 
 // CalcRating calculate the rating of a string based on letter frequency.
 // The higher the rating, the more likely the string is a sentence in English.
-func CalcRating(msg string) float64 {
+func CalcRating(msg []byte) float64 {
 	// Source: http://www.macfreek.nl/memory/Letter_Distribution
 	var frequency = map[byte]float64{
 		'a': 0.08023,
@@ -48,19 +48,19 @@ func CalcRating(msg string) float64 {
 		switch {
 		case ch < 32:
 			// Bad characters, a big minus.
-			rating += -0.3
+			rating += -0.5
 		case (ch >= 33 && ch < 47) || (ch >= 58 && ch < 65) || (ch >= 91 && ch < 96):
 			// symbols, a little minus.
 			rating += -0.05
 		case ch >= 48 && ch < 57:
 			// digits, a little plus.
-			rating += 0.05
+			rating += 0.01
 		default:
 			lowered_character := []byte(strings.ToLower(string(ch)))[0]
 			rating += frequency[lowered_character]
 		}
 	}
-	return rating
+	return rating / float64(len(msg))
 }
 
 // XORByte uses a single byte(b) to run a xor operation on all the bytes in a
@@ -82,9 +82,9 @@ func XORBytes(dst, a, b []byte) int {
 }
 
 // msg2bin converts a message in string to another string, where all of
-func msg2bin(msg string) string {
+func msg2bin(msg []byte) string {
 	bin_ := ""
-	for _, byte_ := range []byte(msg) {
+	for _, byte_ := range msg {
 		converted := strconv.FormatInt(int64(byte_), 2)
 		converted = strings.Repeat("0", 8-len(converted)) + converted
 		bin_ += converted
@@ -113,7 +113,7 @@ func DecodeHex(msg string) []byte {
 }
 
 // HammingDistance calculate the Hamming Distance of two strings.
-func HammingDistance(message1, message2 string) int {
+func HammingDistance(message1, message2 []byte) int {
 	bin1 := msg2bin(message1)
 	bin2 := msg2bin(message2)
 	counts := 0
@@ -132,6 +132,8 @@ func HexToBase64(hex_string string) string {
 	return encoded
 }
 
+// OpenFile will open a file specified by an index and return its content as
+// an array of strings.
 func OpenFile(number string) []string {
 	_, git_root := GitRootDir()
 	inFile, _ := os.Open(filepath.Join(git_root, "solutions", "file."+number+".txt"))
@@ -144,4 +146,23 @@ func OpenFile(number string) []string {
 		content = append(content, scanner.Text())
 	}
 	return content
+}
+
+// DecryptSingleByteXOR will decrypt an array of bytes encrypted using
+// single byte xor
+func DecryptSingleByteXOR(message []byte) (byte, string) {
+	var best_guess byte
+	dst := make([]byte, len(message))
+	max := -1.0
+	for suspect := 1; suspect < 128; suspect++ {
+		XORByte(dst, message, byte(suspect))
+		rating := CalcRating(dst)
+		if rating > max {
+			max = rating
+			best_guess = byte(suspect)
+		}
+	}
+	XORByte(dst, message, best_guess)
+	decoded := string(dst)
+	return best_guess, decoded
 }

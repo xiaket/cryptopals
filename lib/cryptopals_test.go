@@ -1,5 +1,6 @@
 package cryptopals
 
+import "encoding/hex"
 import "bytes"
 import "testing"
 
@@ -28,8 +29,20 @@ func TestDecodeHex(test *testing.T) {
 func TestHammingDistance(test *testing.T) {
 	const message1 = "this is a test"
 	const message2 = "wokka wokka!!!"
-	hamming_distance := HammingDistance(message1, message2)
+	hamming_distance := HammingDistance([]byte(message1), []byte(message2))
 	if hamming_distance != 37 {
 		test.Errorf("Incorrect Hamming Distance: %d, want: %d.", hamming_distance, 37)
+	}
+}
+
+func TestProb3(test *testing.T) {
+	const message = "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736"
+	const expected = "Cooking MC's like a pound of bacon"
+	unhexed := make([]byte, hex.DecodedLen(len(message)))
+	n, _ := hex.Decode(unhexed, []byte(message))
+	unhexed_ := unhexed[:n]
+	_, guess := DecryptSingleByteXOR([]byte(unhexed_))
+	if guess != expected {
+		test.Errorf("Incorrect guess result: %s, want: %s.", guess, expected)
 	}
 }
