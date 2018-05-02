@@ -5,6 +5,8 @@ import "encoding/base64"
 import "encoding/hex"
 import "fmt"
 import "math"
+
+// import "os"
 import "strings"
 import "../lib"
 
@@ -159,4 +161,34 @@ func prob7(key string, block_size int) string {
 func Prob7() {
 	decrypted := prob7("YELLOW SUBMARINE", 16)
 	fmt.Println(string(decrypted))
+}
+
+// detectECB will detect whether an hex encoded string is encrypted with ECB
+func detectECB(line string) bool {
+	trunks := make([]string, len(line)/4)
+	duplication := 0
+	for i := 0; i < len(line)/4; i++ {
+		trunk := line[i*4 : (i+1)*4]
+		found := false
+		for _, item := range trunks {
+			if item == trunk {
+				found = true
+			}
+		}
+		if found {
+			duplication += 1
+		} else {
+			trunks = append(trunks, trunk)
+		}
+	}
+	return float64(duplication)/float64(len(line)) > 0.05
+}
+
+func Prob8() {
+	lines := cryptopals.OpenFile("08")
+	for _, line := range lines {
+		if detectECB(line) {
+			fmt.Println(line)
+		}
+	}
 }
