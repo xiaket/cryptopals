@@ -1,6 +1,4 @@
-// Package cryptopals provides functions used in the solution
-// of cryptopals problems.
-package cryptopals
+package solutions
 
 import "bufio"
 import "encoding/hex"

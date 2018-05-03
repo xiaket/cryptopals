@@ -16,7 +16,7 @@ run () {
 }
 
 test_ () {
-  go test ./lib ./solutions
+  go test ./solutions
 }
 
 less_ () {

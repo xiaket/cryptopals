@@ -1,4 +1,4 @@
-package cryptopals
+package solutions
 
 import "encoding/hex"
 import "bytes"

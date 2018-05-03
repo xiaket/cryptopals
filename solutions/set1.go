@@ -5,14 +5,11 @@ import "encoding/base64"
 import "encoding/hex"
 import "fmt"
 import "math"
-
-// import "os"
 import "strings"
-import "../lib"
 
 func Prob1() {
 	const hex_string = "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d"
-	encoded := cryptopals.HexToBase64(hex_string)
+	encoded := HexToBase64(hex_string)
 	fmt.Println(encoded)
 }
 
@@ -24,13 +21,13 @@ func Prob2() {
 }
 
 func prob2(msg1, msg2 string) string {
-	bin1 := cryptopals.DecodeHex(msg1)
-	bin2 := cryptopals.DecodeHex(msg2)
+	bin1 := DecodeHex(msg1)
+	bin2 := DecodeHex(msg2)
 	fmt.Println(bin1)
 	fmt.Println(bin2)
 
 	dst := make([]byte, len(bin1))
-	cryptopals.XORBytes(dst, bin1, bin2)
+	XORBytes(dst, bin1, bin2)
 	encodedStr := hex.EncodeToString(dst)
 	return encodedStr
 }
@@ -41,7 +38,7 @@ func Prob3() {
 	n, _ := hex.Decode(unhexed, []byte(message))
 	unhexed_ := unhexed[:n]
 
-	_, guess := cryptopals.DecryptSingleByteXOR(unhexed_)
+	_, guess := DecryptSingleByteXOR(unhexed_)
 	fmt.Println(guess)
 }
 
@@ -51,7 +48,7 @@ func Prob4() {
 }
 
 func prob4() string {
-	content := cryptopals.OpenFile("04")
+	content := OpenFile("04")
 	max := 0.0
 	best_guess := ""
 
@@ -59,8 +56,8 @@ func prob4() string {
 		unhexed, _ := hex.DecodeString(line)
 		dst := make([]byte, len(unhexed))
 		for suspect := 32; suspect < 128; suspect++ {
-			cryptopals.XORByte(dst, unhexed, byte(suspect))
-			rating := cryptopals.CalcRating(dst)
+			XORByte(dst, unhexed, byte(suspect))
+			rating := CalcRating(dst)
 			if rating > max {
 				max = rating
 				best_guess = string(dst)
@@ -79,7 +76,7 @@ func Prob5() {
 
 func prob5(message, key string) string {
 	xored := make([]byte, len(message))
-	cryptopals.XORBytes(xored, []byte(message), []byte(key))
+	XORBytes(xored, []byte(message), []byte(key))
 	return hex.EncodeToString(xored)
 }
 
@@ -90,7 +87,7 @@ func findKeySize(data []byte) int {
 		distance := 0
 		trunks := len(data)/size - 2
 		for i := 0; i < trunks; i++ {
-			distance += cryptopals.HammingDistance(data[i*size:(i+1)*size], data[(i+1)*size:(i+2)*size])
+			distance += HammingDistance(data[i*size:(i+1)*size], data[(i+1)*size:(i+2)*size])
 		}
 		norm_distance := float64(distance) / float64(size) / float64(trunks)
 		if norm_distance < min {
@@ -120,7 +117,7 @@ func transpose(blocks [][]byte, keysize int) [][]byte {
 }
 
 func prob6() (string, string) {
-	content := strings.Join(cryptopals.OpenFile("06"), "")
+	content := strings.Join(OpenFile("06"), "")
 	data, _ := base64.StdEncoding.DecodeString(content)
 	keysize := findKeySize(data)
 
@@ -133,11 +130,11 @@ func prob6() (string, string) {
 
 	var encryption_key string
 	for i := range transposed {
-		guess, _ := cryptopals.DecryptSingleByteXOR(transposed[i])
+		guess, _ := DecryptSingleByteXOR(transposed[i])
 		encryption_key += string(guess)
 	}
 	plain_text := make([]byte, len(data))
-	cryptopals.XORBytes(plain_text, []byte(data), []byte(encryption_key))
+	XORBytes(plain_text, []byte(data), []byte(encryption_key))
 	return encryption_key, string(plain_text)
 }
 
@@ -147,7 +144,7 @@ func Prob6() {
 }
 
 func prob7(key string, block_size int) string {
-	content := strings.Join(cryptopals.OpenFile("07"), "")
+	content := strings.Join(OpenFile("07"), "")
 	cipher, _ := aes.NewCipher([]byte(key))
 	cipherText, _ := base64.StdEncoding.DecodeString(content)
 	decrypted := make([]byte, len(cipherText))
@@ -185,7 +182,7 @@ func detectECB(line string) bool {
 }
 
 func Prob8() {
-	lines := cryptopals.OpenFile("08")
+	lines := OpenFile("08")
 	for _, line := range lines {
 		if detectECB(line) {
 			fmt.Println(line)
