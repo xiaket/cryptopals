@@ -160,34 +160,17 @@ func Prob7() {
 	fmt.Println(string(decrypted))
 }
 
-// detectECB will detect whether an hex encoded string is encrypted with ECB
-func detectECB(line string) bool {
-	// a hex string represents 4 bits, so 16 * 8 / 4 = 32 hex chars will
-	// represent a 16 bytes trunk
-	trunks := make([]string, len(line)/32)
-	duplication := 0
-	for i := 0; i < len(line)/32; i++ {
-		trunk := line[i*32 : (i+1)*32]
-		found := false
-		for _, item := range trunks {
-			if item == trunk {
-				found = true
-			}
-		}
-		if found {
-			duplication += 1
-		} else {
-			trunks = append(trunks, trunk)
+func prob8() string {
+	lines := OpenFile("08")
+	var result string
+	for _, line := range lines {
+		if DetectECB(line) {
+			result = line
 		}
 	}
-	return float64(duplication)/float64(len(line)/32) > 0.1
+	return result
 }
 
 func Prob8() {
-	lines := OpenFile("08")
-	for _, line := range lines {
-		if detectECB(line) {
-			fmt.Println(line)
-		}
-	}
+	fmt.Println(prob8())
 }

@@ -57,3 +57,11 @@ func TestProb7(test *testing.T) {
 	decrypted := prob7("YELLOW SUBMARINE", 16)
 	verifyPrefixAndLength(decrypted, prefix, length, test)
 }
+
+func TestProb8(test *testing.T) {
+	const prefix = "d880619740a8a19b7840a8"
+	found := prob8()
+	if !strings.HasPrefix(found, prefix) {
+		test.Errorf("Incorrect result: prefix %s, want: %s.", found[:len(prefix)], prefix)
+	}
+}

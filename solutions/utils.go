@@ -8,6 +8,34 @@ import "path/filepath"
 import "strconv"
 import "strings"
 
+// gitRootDir will find the root directory of this repo.
+func gitRootDir() (bool, string) {
+	dir, _ := filepath.Abs(".")
+	for dir != "/" {
+		if _, err := os.Stat(filepath.Join(dir, "/.git")); err == nil {
+			return true, dir
+		}
+		dir = filepath.Dir(dir)
+	}
+	return false, ""
+}
+
+// OpenFile will open a file specified by an index and return its content as
+// an array of strings.
+func OpenFile(number string) []string {
+	_, git_root := gitRootDir()
+	inFile, _ := os.Open(filepath.Join(git_root, "solutions", "file."+number+".txt"))
+	defer inFile.Close()
+	scanner := bufio.NewScanner(inFile)
+	scanner.Split(bufio.ScanLines)
+	var content []string
+
+	for scanner.Scan() {
+		content = append(content, scanner.Text())
+	}
+	return content
+}
+
 // CalcRating calculate the rating of a string based on letter frequency.
 // The higher the rating, the more likely the string is a sentence in English.
 func CalcRating(msg []byte) float64 {
@@ -90,18 +118,6 @@ func msg2bin(msg []byte) string {
 	return bin_
 }
 
-// GitRootDir will find the root directory of this repo.
-func GitRootDir() (bool, string) {
-	dir, _ := filepath.Abs(".")
-	for dir != "/" {
-		if _, err := os.Stat(filepath.Join(dir, "/.git")); err == nil {
-			return true, dir
-		}
-		dir = filepath.Dir(dir)
-	}
-	return false, ""
-}
-
 // DecodeHex is a thin wrapper around hex.Decode to accept a string as input.
 func DecodeHex(msg string) []byte {
 	src := []byte(msg)
@@ -130,22 +146,6 @@ func HexToBase64(hex_string string) string {
 	return encoded
 }
 
-// OpenFile will open a file specified by an index and return its content as
-// an array of strings.
-func OpenFile(number string) []string {
-	_, git_root := GitRootDir()
-	inFile, _ := os.Open(filepath.Join(git_root, "solutions", "file."+number+".txt"))
-	defer inFile.Close()
-	scanner := bufio.NewScanner(inFile)
-	scanner.Split(bufio.ScanLines)
-	var content []string
-
-	for scanner.Scan() {
-		content = append(content, scanner.Text())
-	}
-	return content
-}
-
 // DecryptSingleByteXOR will decrypt an array of bytes encrypted using
 // single byte xor
 func DecryptSingleByteXOR(message []byte) (byte, string) {
@@ -163,4 +163,27 @@ func DecryptSingleByteXOR(message []byte) (byte, string) {
 	XORByte(dst, message, best_guess)
 	decoded := string(dst)
 	return best_guess, decoded
+}
+
+// DetectECB will detect whether an hex encoded string is encrypted with ECB
+func DetectECB(line string) bool {
+	// a hex string represents 4 bits, so 16 * 8 / 4 = 32 hex chars will
+	// represent a 16 bytes trunk
+	trunks := make([]string, len(line)/32)
+	duplication := 0
+	for i := 0; i < len(line)/32; i++ {
+		trunk := line[i*32 : (i+1)*32]
+		found := false
+		for _, item := range trunks {
+			if item == trunk {
+				found = true
+			}
+		}
+		if found {
+			duplication += 1
+		} else {
+			trunks = append(trunks, trunk)
+		}
+	}
+	return float64(duplication)/float64(len(line)/32) > 0.1
 }
