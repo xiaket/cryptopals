@@ -22,16 +22,16 @@ func gitRootDir() (bool, string) {
 
 // OpenFile will open a file specified by an index and return its content as
 // an array of strings.
-func OpenFile(number string) []string {
+func OpenFile(number string) [][]byte {
 	_, git_root := gitRootDir()
 	inFile, _ := os.Open(filepath.Join(git_root, "solutions", "file."+number+".txt"))
 	defer inFile.Close()
 	scanner := bufio.NewScanner(inFile)
 	scanner.Split(bufio.ScanLines)
-	var content []string
+	var content [][]byte
 
 	for scanner.Scan() {
-		content = append(content, scanner.Text())
+		content = append(content, []byte(scanner.Text()))
 	}
 	return content
 }

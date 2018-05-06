@@ -1,11 +1,11 @@
 package solutions
 
+import "bytes"
 import "crypto/aes"
 import "encoding/base64"
 import "encoding/hex"
 import "fmt"
 import "math"
-import "strings"
 
 func Prob1() {
 	const hex_string = "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d"
@@ -37,34 +37,34 @@ func Prob3() {
 	unhexed := make([]byte, hex.DecodedLen(len(message)))
 	n, _ := hex.Decode(unhexed, []byte(message))
 	unhexed_ := unhexed[:n]
-
 	_, guess := DecryptSingleByteXOR(unhexed_)
 	fmt.Println(guess)
 }
 
 func Prob4() {
 	guess := prob4()
-	fmt.Println(guess)
+	fmt.Println(string(guess))
 }
 
-func prob4() string {
+func prob4() []byte {
 	content := OpenFile("04")
 	max := 0.0
-	best_guess := ""
+	var best_guess []byte
 
 	for _, line := range content {
-		unhexed, _ := hex.DecodeString(line)
-		dst := make([]byte, len(unhexed))
+		unhexed := make([]byte, hex.DecodedLen(len(line)))
+		n, _ := hex.Decode(unhexed, line)
 		for suspect := 32; suspect < 128; suspect++ {
-			XORByte(dst, unhexed, byte(suspect))
+			dst := make([]byte, n)
+			XORByte(dst, unhexed[:n], byte(suspect))
 			rating := CalcRating(dst)
 			if rating > max {
 				max = rating
-				best_guess = string(dst)
+				best_guess = dst
 			}
 		}
 	}
-	return strings.TrimRight(best_guess, "\n")
+	return bytes.TrimRight(best_guess, "\n")
 }
 
 func Prob5() {
@@ -117,7 +117,7 @@ func transpose(blocks [][]byte, keysize int) [][]byte {
 }
 
 func prob6() (string, string) {
-	content := strings.Join(OpenFile("06"), "")
+	content := string(bytes.Join(OpenFile("06"), []byte("")))
 	data, _ := base64.StdEncoding.DecodeString(content)
 	keysize := findKeySize(data)
 
@@ -144,7 +144,7 @@ func Prob6() {
 }
 
 func prob7(key string, block_size int) string {
-	content := strings.Join(OpenFile("07"), "")
+	content := string(bytes.Join(OpenFile("07"), []byte("")))
 	cipher, _ := aes.NewCipher([]byte(key))
 	cipherText, _ := base64.StdEncoding.DecodeString(content)
 	decrypted := make([]byte, len(cipherText))
@@ -164,8 +164,8 @@ func prob8() string {
 	lines := OpenFile("08")
 	var result string
 	for _, line := range lines {
-		if DetectECB(line) {
-			result = line
+		if DetectECB(string(line)) {
+			result = string(line)
 		}
 	}
 	return result

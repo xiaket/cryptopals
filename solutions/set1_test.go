@@ -1,5 +1,6 @@
 package solutions
 
+import "bytes"
 import "strings"
 import "testing"
 
@@ -14,9 +15,9 @@ func TestProb2(test *testing.T) {
 }
 
 func TestProb4(test *testing.T) {
-	const expected = "Now that the party is jumping"
+	expected := []byte("Now that the party is jumping")
 	guess := prob4()
-	if guess != expected {
+	if !bytes.Equal(guess, expected) {
 		test.Errorf("Incorrect guess result: %s, want: %s.", guess, expected)
 	}
 }
