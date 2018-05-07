@@ -1,12 +1,12 @@
 package solutions
 
 import "bufio"
+import "bytes"
 import "encoding/hex"
 import "encoding/base64"
+import "fmt"
 import "os"
 import "path/filepath"
-import "strconv"
-import "strings"
 
 // gitRootDir will find the root directory of this repo.
 func gitRootDir() (bool, string) {
@@ -82,7 +82,7 @@ func CalcRating(msg []byte) float64 {
 			// digits, a little plus.
 			rating += 0.01
 		default:
-			lowered_character := []byte(strings.ToLower(string(ch)))[0]
+			lowered_character := bytes.ToLower([]byte{ch})[0]
 			rating += frequency[lowered_character]
 		}
 	}
@@ -107,15 +107,12 @@ func XORBytes(dst, a, b []byte) int {
 	return n
 }
 
-// msg2bin converts a message in string to another string, where all of
 func msg2bin(msg []byte) string {
-	bin_ := ""
-	for _, byte_ := range msg {
-		converted := strconv.FormatInt(int64(byte_), 2)
-		converted = strings.Repeat("0", 8-len(converted)) + converted
-		bin_ += converted
+	result := ""
+	for _, ch := range msg {
+		result = fmt.Sprintf("%s%.8b", result, ch)
 	}
-	return bin_
+	return result
 }
 
 // DecodeHex is a thin wrapper around hex.Decode to accept a string as input.
