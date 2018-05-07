@@ -10,5 +10,6 @@ var (
 		"6": Prob6,
 		"7": Prob7,
 		"8": Prob8,
+		"9": Prob9,
 	}
 )

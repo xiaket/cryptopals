@@ -184,3 +184,11 @@ func DetectECB(line string) bool {
 	}
 	return float64(duplication)/float64(len(line)/32) > 0.1
 }
+
+func PKCS7Padding(msg []byte, length int) []byte {
+	padding := length - len(msg)
+	for i := 0; i < padding; i++ {
+		msg = append(msg, byte(padding))
+	}
+	return msg
+}
