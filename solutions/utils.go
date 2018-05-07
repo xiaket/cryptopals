@@ -107,7 +107,7 @@ func XORBytes(dst, a, b []byte) int {
 	return n
 }
 
-func msg2bin(msg []byte) string {
+func Msg2Bin(msg []byte) string {
 	result := ""
 	for _, ch := range msg {
 		result = fmt.Sprintf("%s%.8b", result, ch)
@@ -115,18 +115,10 @@ func msg2bin(msg []byte) string {
 	return result
 }
 
-// DecodeHex is a thin wrapper around hex.Decode to accept a string as input.
-func DecodeHex(msg string) []byte {
-	src := []byte(msg)
-	bin := make([]byte, hex.DecodedLen(len(src)))
-	hex.Decode(bin, src)
-	return bin
-}
-
 // HammingDistance calculate the Hamming Distance of two strings.
 func HammingDistance(message1, message2 []byte) int {
-	bin1 := msg2bin(message1)
-	bin2 := msg2bin(message2)
+	bin1 := Msg2Bin(message1)
+	bin2 := Msg2Bin(message2)
 	counts := 0
 	for i, ch := range bin1 {
 		if byte(ch) != bin2[i] {
@@ -137,8 +129,9 @@ func HammingDistance(message1, message2 []byte) int {
 }
 
 // HexToBase64 encode a string in hex using base64.
-func HexToBase64(hex_string string) string {
-	bin := DecodeHex(hex_string)
+func HexToBase64(hex_bytes []byte) string {
+	bin := make([]byte, hex.DecodedLen(len(hex_bytes)))
+	hex.Decode(bin, hex_bytes)
 	encoded := base64.StdEncoding.EncodeToString(bin)
 	return encoded
 }
