@@ -28,3 +28,8 @@ func prob10(key, iv []byte) []byte {
 	mode.CryptBlocks(ciphertext, ciphertext)
 	return ciphertext
 }
+
+func Prob11() {
+	key := GenerateKey(16)
+	fmt.Println(key)
+}
