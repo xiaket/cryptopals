@@ -2,7 +2,6 @@ package solutions
 
 import "bytes"
 import "crypto/aes"
-import "crypto/cipher"
 import "encoding/base64"
 import "fmt"
 
@@ -21,12 +20,8 @@ func Prob10() {
 
 func prob10(key, iv []byte) []byte {
 	content := string(bytes.Join(OpenFile("10"), []byte("")))
-	ciphertext, _ := base64.StdEncoding.DecodeString(content)
-	block, _ := aes.NewCipher([]byte(key))
-
-	mode := cipher.NewCBCDecrypter(block, iv)
-	mode.CryptBlocks(ciphertext, ciphertext)
-	return ciphertext
+	cipherText, _ := base64.StdEncoding.DecodeString(content)
+	return DecryptCBC(cipherText, key, iv)
 }
 
 func Prob11() {

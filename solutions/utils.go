@@ -3,6 +3,7 @@ package solutions
 import "bufio"
 import "bytes"
 import "crypto/aes"
+import "crypto/cipher"
 import "crypto/rand"
 import "encoding/hex"
 import "encoding/base64"
@@ -218,13 +219,14 @@ func XORBytes(dst, a, b []byte) int {
 
 // Set2 functions.
 
-// PKCS7Padding implements PKCS#7 padding scheme.
-func PKCS7Padding(msg []byte, length int) []byte {
-	padding := length - len(msg)
-	for i := 0; i < padding; i++ {
-		msg = append(msg, byte(padding))
-	}
-	return msg
+// DecryptCBC will decrypt text encrypted using a AES-128 running CBC mode using
+// a provided key.
+func DecryptCBC(cipherText, key, iv []byte) []byte {
+	block, _ := aes.NewCipher(key)
+	mode := cipher.NewCBCDecrypter(block, iv)
+
+	mode.CryptBlocks(cipherText, cipherText)
+	return cipherText
 }
 
 // GenerateKey generates a crypto-secure key
@@ -232,4 +234,13 @@ func GenerateKey(length int) []byte {
 	key := make([]byte, length)
 	rand.Read(key)
 	return key
+}
+
+// PKCS7Padding implements PKCS#7 padding scheme.
+func PKCS7Padding(msg []byte, length int) []byte {
+	padding := length - len(msg)
+	for i := 0; i < padding; i++ {
+		msg = append(msg, byte(padding))
+	}
+	return msg
 }
