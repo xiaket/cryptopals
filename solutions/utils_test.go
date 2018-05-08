@@ -28,8 +28,8 @@ func TestProb3(test *testing.T) {
 	n, _ := hex.Decode(unhexed, []byte(message))
 	unhexed_ := unhexed[:n]
 	_, guess := DecryptSingleByteXOR([]byte(unhexed_))
-	if guess != expected {
-		test.Errorf("Incorrect guess result: %s, want: %s.", guess, expected)
+	if string(guess) != expected {
+		test.Errorf("Incorrect guess result: %s, want: %s.", string(guess), expected)
 	}
 }
 

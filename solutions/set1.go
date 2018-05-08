@@ -40,7 +40,7 @@ func Prob3() {
 	n, _ := hex.Decode(unhexed, []byte(message))
 	unhexed_ := unhexed[:n]
 	_, guess := DecryptSingleByteXOR(unhexed_)
-	fmt.Println(guess)
+	fmt.Println(string(guess))
 }
 
 func Prob4() {

@@ -115,7 +115,7 @@ func Msg2Bin(msg []byte) string {
 	return result
 }
 
-// HammingDistance calculate the Hamming Distance of two strings.
+// HammingDistance calculate the Hamming Distance of two byte arrays.
 func HammingDistance(message1, message2 []byte) int {
 	bin1 := Msg2Bin(message1)
 	bin2 := Msg2Bin(message2)
@@ -128,7 +128,7 @@ func HammingDistance(message1, message2 []byte) int {
 	return counts
 }
 
-// HexToBase64 encode a string in hex using base64.
+// HexToBase64 encode a byte array in hex using base64.
 func HexToBase64(hex_bytes []byte) string {
 	bin := make([]byte, hex.DecodedLen(len(hex_bytes)))
 	hex.Decode(bin, hex_bytes)
@@ -138,7 +138,7 @@ func HexToBase64(hex_bytes []byte) string {
 
 // DecryptSingleByteXOR will decrypt an array of bytes encrypted using
 // single byte xor
-func DecryptSingleByteXOR(message []byte) (byte, string) {
+func DecryptSingleByteXOR(message []byte) (byte, []byte) {
 	var best_guess byte
 	dst := make([]byte, len(message))
 	max := -1.0
@@ -151,8 +151,7 @@ func DecryptSingleByteXOR(message []byte) (byte, string) {
 		}
 	}
 	XORByte(dst, message, best_guess)
-	decoded := string(dst)
-	return best_guess, decoded
+	return best_guess, dst
 }
 
 // DetectECB will detect whether an hex encoded string is encrypted with ECB
