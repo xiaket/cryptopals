@@ -2,11 +2,14 @@ package solutions
 
 import "bufio"
 import "bytes"
+import "crypto/aes"
 import "encoding/hex"
 import "encoding/base64"
 import "fmt"
 import "os"
 import "path/filepath"
+
+// Common utils used by all problem sets.
 
 // gitRootDir will find the root directory of this repo.
 func gitRootDir() (bool, string) {
@@ -35,6 +38,8 @@ func OpenFile(number string) [][]byte {
 	}
 	return content
 }
+
+// Set1 functions.
 
 // CalcRating calculate the rating of a string based on letter frequency.
 // The higher the rating, the more likely the string is a sentence in English.
@@ -89,51 +94,16 @@ func CalcRating(msg []byte) float64 {
 	return rating / float64(len(msg))
 }
 
-// XORByte uses a single byte(b) to run a xor operation on all the bytes in a
-func XORByte(dst []byte, a []byte, b byte) int {
-	n := len(a)
-	for i := 0; i < n; i++ {
-		dst[i] = a[i] ^ b
-	}
-	return n
-}
+// DecryptECB will decrypt text encrypted using a AES-128 running ECB mode using
+// a provided key.
+func DecryptECB(cipherText []byte, key []byte, block_size int) []byte {
+	cipher, _ := aes.NewCipher([]byte(key))
+	decrypted := make([]byte, len(cipherText))
 
-// XORByte uses an array of bytes(b) to run a xor operation on all the bytes in a
-func XORBytes(dst, a, b []byte) int {
-	n := len(a)
-	for i := 0; i < n; i++ {
-		dst[i] = a[i] ^ b[i%len(b)]
+	for bs, be := 0, block_size; bs < len(cipherText); bs, be = bs+block_size, be+block_size {
+		cipher.Decrypt(decrypted[bs:be], cipherText[bs:be])
 	}
-	return n
-}
-
-func Msg2Bin(msg []byte) string {
-	result := ""
-	for _, ch := range msg {
-		result = fmt.Sprintf("%s%.8b", result, ch)
-	}
-	return result
-}
-
-// HammingDistance calculate the Hamming Distance of two byte arrays.
-func HammingDistance(message1, message2 []byte) int {
-	bin1 := Msg2Bin(message1)
-	bin2 := Msg2Bin(message2)
-	counts := 0
-	for i, ch := range bin1 {
-		if byte(ch) != bin2[i] {
-			counts += 1
-		}
-	}
-	return counts
-}
-
-// HexToBase64 encode a byte array in hex using base64.
-func HexToBase64(hex_bytes []byte) string {
-	bin := make([]byte, hex.DecodedLen(len(hex_bytes)))
-	hex.Decode(bin, hex_bytes)
-	encoded := base64.StdEncoding.EncodeToString(bin)
-	return encoded
+	return decrypted
 }
 
 // DecryptSingleByteXOR will decrypt an array of bytes encrypted using
@@ -176,6 +146,76 @@ func DetectECB(line string) bool {
 	}
 	return float64(duplication)/float64(len(line)/32) > 0.1
 }
+
+// FindKeySize will find the key size in ciphertext protected using
+// repeating-key XOR.
+func FindKeySize(data []byte) int {
+	min := float64(100)
+	keysize := 0
+	for size := 2; size <= 64; size++ {
+		distance := 0
+		trunks := len(data)/size - 2
+		for i := 0; i < trunks; i++ {
+			distance += HammingDistance(data[i*size:(i+1)*size], data[(i+1)*size:(i+2)*size])
+		}
+		norm_distance := float64(distance) / float64(size) / float64(trunks)
+		if norm_distance < min {
+			keysize = size
+			min = norm_distance
+		}
+	}
+	return keysize
+}
+
+// HammingDistance calculate the Hamming Distance of two byte arrays.
+func HammingDistance(message1, message2 []byte) int {
+	bin1 := Msg2Bin(message1)
+	bin2 := Msg2Bin(message2)
+	counts := 0
+	for i, ch := range bin1 {
+		if byte(ch) != bin2[i] {
+			counts += 1
+		}
+	}
+	return counts
+}
+
+// HexToBase64 encode a byte array in hex using base64.
+func HexToBase64(hex_bytes []byte) string {
+	bin := make([]byte, hex.DecodedLen(len(hex_bytes)))
+	hex.Decode(bin, hex_bytes)
+	encoded := base64.StdEncoding.EncodeToString(bin)
+	return encoded
+}
+
+// convert all bytes in a byte array to their binary representation.
+func Msg2Bin(msg []byte) string {
+	result := ""
+	for _, ch := range msg {
+		result = fmt.Sprintf("%s%.8b", result, ch)
+	}
+	return result
+}
+
+// XORByte uses a single byte(b) to run a xor operation on all the bytes in a
+func XORByte(dst []byte, a []byte, b byte) int {
+	n := len(a)
+	for i := 0; i < n; i++ {
+		dst[i] = a[i] ^ b
+	}
+	return n
+}
+
+// XORByte uses an array of bytes(b) to run a xor operation on all the bytes in a
+func XORBytes(dst, a, b []byte) int {
+	n := len(a)
+	for i := 0; i < n; i++ {
+		dst[i] = a[i] ^ b[i%len(b)]
+	}
+	return n
+}
+
+// Set2 functions.
 
 func PKCS7Padding(msg []byte, length int) []byte {
 	padding := length - len(msg)

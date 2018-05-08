@@ -55,7 +55,7 @@ func TestProb6(test *testing.T) {
 func TestProb7(test *testing.T) {
 	const prefix = "I'm back and I'm ringin' the bell"
 	const length = 2880
-	decrypted := prob7("YELLOW SUBMARINE", 16)
+	decrypted := prob7([]byte("YELLOW SUBMARINE"), 16)
 	verifyPrefixAndLength(decrypted, prefix, length, test)
 }
 

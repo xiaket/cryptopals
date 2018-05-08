@@ -1,7 +1,6 @@
 package solutions
 
 import "bytes"
-import "crypto/aes"
 import "encoding/base64"
 import "encoding/hex"
 import "fmt"
@@ -82,24 +81,6 @@ func prob5(message, key string) string {
 	return hex.EncodeToString(xored)
 }
 
-func findKeySize(data []byte) int {
-	min := float64(100)
-	keysize := 0
-	for size := 2; size <= 40; size++ {
-		distance := 0
-		trunks := len(data)/size - 2
-		for i := 0; i < trunks; i++ {
-			distance += HammingDistance(data[i*size:(i+1)*size], data[(i+1)*size:(i+2)*size])
-		}
-		norm_distance := float64(distance) / float64(size) / float64(trunks)
-		if norm_distance < min {
-			keysize = size
-			min = norm_distance
-		}
-	}
-	return keysize
-}
-
 func transpose(blocks [][]byte, keysize int) [][]byte {
 	remains := len(blocks[len(blocks)-1])
 	transposed := make([][]byte, keysize)
@@ -121,7 +102,7 @@ func transpose(blocks [][]byte, keysize int) [][]byte {
 func prob6() (string, string) {
 	content := string(bytes.Join(OpenFile("06"), []byte("")))
 	data, _ := base64.StdEncoding.DecodeString(content)
-	keysize := findKeySize(data)
+	keysize := FindKeySize(data)
 
 	blocks := [][]byte{}
 	for i := 0; float64(i) < math.Ceil(float64(len(data))/float64(keysize)); i++ {
@@ -145,20 +126,15 @@ func Prob6() {
 	fmt.Println(encryption_key)
 }
 
-func prob7(key string, block_size int) string {
+func prob7(key []byte, block_size int) string {
 	content := string(bytes.Join(OpenFile("07"), []byte("")))
-	cipher, _ := aes.NewCipher([]byte(key))
 	cipherText, _ := base64.StdEncoding.DecodeString(content)
-	decrypted := make([]byte, len(cipherText))
-
-	for bs, be := 0, block_size; bs < len(cipherText); bs, be = bs+block_size, be+block_size {
-		cipher.Decrypt(decrypted[bs:be], cipherText[bs:be])
-	}
+	decrypted := DecryptECB(cipherText, key, block_size)
 	return string(decrypted)
 }
 
 func Prob7() {
-	decrypted := prob7("YELLOW SUBMARINE", 16)
+	decrypted := prob7([]byte("YELLOW SUBMARINE"), 16)
 	fmt.Println(string(decrypted))
 }
 
