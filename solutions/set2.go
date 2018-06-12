@@ -25,6 +25,6 @@ func prob10(key, iv []byte) []byte {
 }
 
 func Prob11() {
-	key := GenerateKey(16)
-	fmt.Println(key)
+	encrypted := EncryptionOracle([]byte("This is the secret in plaintext."))
+	fmt.Println(encrypted)
 }

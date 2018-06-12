@@ -8,6 +8,8 @@ import "crypto/rand"
 import "encoding/hex"
 import "encoding/base64"
 import "fmt"
+import mrand "math/rand"
+import "math/big"
 import "os"
 import "path/filepath"
 
@@ -242,5 +244,21 @@ func PKCS7Padding(msg []byte, length int) []byte {
 	for i := 0; i < padding; i++ {
 		msg = append(msg, byte(padding))
 	}
+	return msg
+}
+
+// PadMessage will padding a message as bytes with random bytes.
+func PadMessage(length int, message []byte) []byte {
+	seed, _ := rand.Int(rand.Reader, big.NewInt(1000000000))
+	mrand.Seed(seed.Int64())
+	padding_left := mrand.Intn(length + 1)
+	padding_right := mrand.Intn(length + 1)
+	message = append(GenerateKey(padding_left+length), message...)
+	return append(message, GenerateKey(padding_right+length)...)
+}
+
+// EncryptionOracle is a function that generate a random key and encrypt data under it.
+func EncryptionOracle(msg []byte) []byte {
+	msg = PadMessage(6, msg)
 	return msg
 }
