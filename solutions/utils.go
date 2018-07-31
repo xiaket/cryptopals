@@ -8,6 +8,7 @@ import "crypto/rand"
 import "encoding/hex"
 import "encoding/base64"
 import "fmt"
+import "io"
 import mrand "math/rand"
 import "math/big"
 import "os"
@@ -240,7 +241,7 @@ func GenerateKey(length int) []byte {
 
 // PKCS7Padding implements PKCS#7 padding scheme.
 func PKCS7Padding(msg []byte, length int) []byte {
-	padding := length - len(msg)
+	padding := length - (len(msg) % length)
 	for i := 0; i < padding; i++ {
 		msg = append(msg, byte(padding))
 	}
@@ -248,17 +249,91 @@ func PKCS7Padding(msg []byte, length int) []byte {
 }
 
 // PadMessage will padding a message as bytes with random bytes.
-func PadMessage(length int, message []byte) []byte {
-	seed, _ := rand.Int(rand.Reader, big.NewInt(1000000000))
+func PadMessage(prefix, suffix int, message []byte) []byte {
+	seed, _ := rand.Int(rand.Reader, big.NewInt(1000000))
 	mrand.Seed(seed.Int64())
-	padding_left := mrand.Intn(length + 1)
-	padding_right := mrand.Intn(length + 1)
-	message = append(GenerateKey(padding_left+length), message...)
-	return append(message, GenerateKey(padding_right+length)...)
+	padding_left := mrand.Intn(prefix + 1)
+	padding_right := mrand.Intn(suffix + 1)
+	message = append(GenerateKey(padding_left+prefix), message...)
+	return append(message, GenerateKey(padding_right+suffix)...)
+}
+
+// EncryptECB will encrypt a message using ECB with a key and return it
+func EncryptECB(message []byte, key []byte) []byte {
+	block, _ := aes.NewCipher(key)
+
+	ciphertext := make([]byte, len(message))
+	mode := NewECBEncrypter(block)
+	mode.CryptBlocks(ciphertext, message)
+	return ciphertext
+}
+
+// EncryptCBC will encrypt a message using CBC with a key and an IV and return it
+func EncryptCBC(message []byte, key []byte) []byte {
+	block, _ := aes.NewCipher(key)
+
+	ciphertext := make([]byte, aes.BlockSize+len(message))
+	iv := ciphertext[:aes.BlockSize]
+	io.ReadFull(rand.Reader, iv)
+
+	mode := cipher.NewCBCEncrypter(block, iv)
+	mode.CryptBlocks(ciphertext[aes.BlockSize:], message)
+	return ciphertext
 }
 
 // EncryptionOracle is a function that generate a random key and encrypt data under it.
 func EncryptionOracle(msg []byte) []byte {
-	msg = PadMessage(6, msg)
-	return msg
+	mode := ""
+	var CipherText []byte
+	key := GenerateKey(16)
+	msg = PadMessage(5, 5, msg)
+	msg = PKCS7Padding(msg, aes.BlockSize)
+
+	seed, _ := rand.Int(rand.Reader, big.NewInt(1000000))
+	mrand.Seed(seed.Int64())
+	if mrand.Intn(2) == 1 {
+		mode = "ECB"
+		CipherText = EncryptECB(msg, key)
+	} else {
+		mode = "CBC"
+		CipherText = EncryptCBC(msg, key)
+	}
+	fmt.Println("use ", mode)
+	return CipherText
+}
+
+type ecb struct {
+	b         cipher.Block
+	blockSize int
+}
+
+func newECB(b cipher.Block) *ecb {
+	return &ecb{
+		b:         b,
+		blockSize: b.BlockSize(),
+	}
+}
+
+type ecbEncrypter ecb
+
+// NewECBEncrypter returns a BlockMode which encrypts in electronic code book
+// mode, using the given Block.
+func NewECBEncrypter(b cipher.Block) cipher.BlockMode {
+	return (*ecbEncrypter)(newECB(b))
+}
+
+func (x *ecbEncrypter) BlockSize() int { return x.blockSize }
+
+func (x *ecbEncrypter) CryptBlocks(dst, src []byte) {
+	if len(src)%x.blockSize != 0 {
+		panic("crypto/cipher: input not full blocks")
+	}
+	if len(dst) < len(src) {
+		panic("crypto/cipher: output smaller than input")
+	}
+	for len(src) > 0 {
+		x.b.Encrypt(dst, src[:x.blockSize])
+		src = src[x.blockSize:]
+		dst = dst[x.blockSize:]
+	}
 }
