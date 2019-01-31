@@ -1,36 +1,37 @@
-package solutions
+package set1
 
 import "bytes"
 import "encoding/base64"
 import "encoding/hex"
 import "fmt"
 import "math"
+import "github.com/xiaket/cryptopals/pkg/lib"
 
 func Prob1() {
 	const hex_string = "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d"
-	encoded := HexToBase64([]byte(hex_string))
-	fmt.Println(encoded)
+	encoded := lib.HexToBase64([]byte(hex_string))
+	fmt.Println(string(encoded))
 }
 
 func Prob2() {
-	const msg1 = "1c0111001f010100061a024b53535009181c"
-	const msg2 = "686974207468652062756c6c277320657965"
-	encodedStr := prob2([]byte(msg1), []byte(msg2))
-	fmt.Println(encodedStr)
+	msg1 := []byte("1c0111001f010100061a024b53535009181c")
+	msg2 := []byte("686974207468652062756c6c277320657965")
+	encoded := prob2(msg1, msg2)
+	fmt.Println(string(encoded))
 }
 
-func prob2(msg1, msg2 []byte) string {
+func prob2(msg1, msg2 []byte) []byte {
 	bin1 := make([]byte, hex.DecodedLen(len(msg1)))
 	bin2 := make([]byte, hex.DecodedLen(len(msg2)))
 	hex.Decode(bin1, msg1)
 	hex.Decode(bin2, msg2)
-	fmt.Println(bin1)
-	fmt.Println(bin2)
 
 	dst := make([]byte, len(bin1))
-	XORBytes(dst, bin1, bin2)
-	encodedStr := hex.EncodeToString(dst)
-	return encodedStr
+	lib.XORBytes(dst, bin1, bin2)
+
+	encoded := make([]byte, hex.EncodedLen(len(dst)))
+	hex.Encode(encoded, dst)
+	return encoded
 }
 
 func Prob3() {
@@ -38,7 +39,7 @@ func Prob3() {
 	unhexed := make([]byte, hex.DecodedLen(len(message)))
 	n, _ := hex.Decode(unhexed, []byte(message))
 	unhexed_ := unhexed[:n]
-	_, guess := DecryptSingleByteXOR(unhexed_)
+	_, guess := lib.DecryptSingleByteXOR(unhexed_)
 	fmt.Println(string(guess))
 }
 
@@ -48,7 +49,7 @@ func Prob4() {
 }
 
 func prob4() []byte {
-	content := OpenFile("04")
+	content := lib.OpenFile("04")
 	max := 0.0
 	var best_guess []byte
 
@@ -57,8 +58,8 @@ func prob4() []byte {
 		n, _ := hex.Decode(unhexed, line)
 		for suspect := 32; suspect < 128; suspect++ {
 			dst := make([]byte, n)
-			XORByte(dst, unhexed[:n], byte(suspect))
-			rating := CalcRating(dst)
+			lib.XORByte(dst, unhexed[:n], byte(suspect))
+			rating := lib.CalcRating(dst)
 			if rating > max {
 				max = rating
 				best_guess = dst
@@ -77,7 +78,7 @@ func Prob5() {
 
 func prob5(message, key string) string {
 	xored := make([]byte, len(message))
-	XORBytes(xored, []byte(message), []byte(key))
+	lib.XORBytes(xored, []byte(message), []byte(key))
 	return hex.EncodeToString(xored)
 }
 
@@ -100,9 +101,9 @@ func transpose(blocks [][]byte, keysize int) [][]byte {
 }
 
 func prob6() (string, string) {
-	content := string(bytes.Join(OpenFile("06"), []byte("")))
+	content := string(bytes.Join(lib.OpenFile("06"), []byte("")))
 	data, _ := base64.StdEncoding.DecodeString(content)
-	keysize := FindKeySize(data)
+	keysize := lib.FindKeySize(data)
 
 	blocks := [][]byte{}
 	for i := 0; float64(i) < math.Ceil(float64(len(data))/float64(keysize)); i++ {
@@ -113,11 +114,11 @@ func prob6() (string, string) {
 
 	var encryption_key string
 	for i := range transposed {
-		guess, _ := DecryptSingleByteXOR(transposed[i])
+		guess, _ := lib.DecryptSingleByteXOR(transposed[i])
 		encryption_key += string(guess)
 	}
 	plain_text := make([]byte, len(data))
-	XORBytes(plain_text, []byte(data), []byte(encryption_key))
+	lib.XORBytes(plain_text, []byte(data), []byte(encryption_key))
 	return encryption_key, string(plain_text)
 }
 
@@ -127,9 +128,9 @@ func Prob6() {
 }
 
 func prob7(key []byte, block_size int) string {
-	content := string(bytes.Join(OpenFile("07"), []byte("")))
+	content := string(bytes.Join(lib.OpenFile("07"), []byte("")))
 	cipherText, _ := base64.StdEncoding.DecodeString(content)
-	decrypted := DecryptECB(cipherText, key, block_size)
+	decrypted := lib.DecryptECB(cipherText, key, block_size)
 	return string(decrypted)
 }
 
@@ -139,10 +140,10 @@ func Prob7() {
 }
 
 func prob8() string {
-	lines := OpenFile("08")
+	lines := lib.OpenFile("08")
 	var result string
 	for _, line := range lines {
-		if DetectECB(string(line)) {
+		if lib.DetectECB(string(line)) {
 			result = string(line)
 		}
 	}

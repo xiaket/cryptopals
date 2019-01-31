@@ -1,25 +1,23 @@
-package solutions
+package set1
 
-import "bytes"
-import "strings"
-import "testing"
+import (
+	"github.com/stretchr/testify/assert"
+	"strings"
+	"testing"
+)
 
 func TestProb2(test *testing.T) {
-	const msg1 = "1c0111001f010100061a024b53535009181c"
-	const msg2 = "686974207468652062756c6c277320657965"
+	msg1 := []byte("1c0111001f010100061a024b53535009181c")
+	msg2 := []byte("686974207468652062756c6c277320657965")
 	const expected = "746865206b696420646f6e277420706c6179"
-	encoded := prob2([]byte(msg1), []byte(msg2))
-	if encoded != expected {
-		test.Errorf("Incorrect xored string: %s, want: %s.", encoded, expected)
-	}
+	encoded := string(prob2(msg1, msg2))
+	assert.Equal(test, encoded, expected, "Incorrect xored string: %s, want: %s.", encoded, expected)
 }
 
 func TestProb4(test *testing.T) {
 	expected := []byte("Now that the party is jumping")
 	guess := prob4()
-	if !bytes.Equal(guess, expected) {
-		test.Errorf("Incorrect guess result: %s, want: %s.", guess, expected)
-	}
+	assert.Equal(test, guess, expected, "Incorrect guess result: %s, want: %s.", guess, expected)
 }
 
 func TestProb5(test *testing.T) {

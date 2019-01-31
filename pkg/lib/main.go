@@ -1,4 +1,4 @@
-package solutions
+package lib
 
 import "bufio"
 import "bytes"
@@ -31,8 +31,8 @@ func gitRootDir() (bool, string) {
 // OpenFile will open a file specified by an index and return its content as
 // an array of strings.
 func OpenFile(number string) [][]byte {
-	_, git_root := gitRootDir()
-	inFile, _ := os.Open(filepath.Join(git_root, "solutions", "file."+number+".txt"))
+	_, root := gitRootDir()
+	inFile, _ := os.Open(filepath.Join(root, "assets", "file."+number+".txt"))
 	defer inFile.Close()
 	scanner := bufio.NewScanner(inFile)
 	scanner.Split(bufio.ScanLines)
@@ -186,11 +186,12 @@ func HammingDistance(message1, message2 []byte) int {
 }
 
 // HexToBase64 encode a byte array in hex using base64.
-func HexToBase64(hex_bytes []byte) string {
+func HexToBase64(hex_bytes []byte) []byte {
 	bin := make([]byte, hex.DecodedLen(len(hex_bytes)))
 	hex.Decode(bin, hex_bytes)
-	encoded := base64.StdEncoding.EncodeToString(bin)
-	return encoded
+	dst := make([]byte, base64.StdEncoding.EncodedLen(len(bin)))
+	base64.StdEncoding.Encode(dst, bin)
+	return dst
 }
 
 // convert all bytes in a byte array to their binary representation.
@@ -337,3 +338,46 @@ func (x *ecbEncrypter) CryptBlocks(dst, src []byte) {
 		dst = dst[x.blockSize:]
 	}
 }
+
+// CBCEncrypter encrypt a message with a key using CBC mod
+func CBCEncrypter(key, plaintext []byte) []byte {
+	block, _ := aes.NewCipher(key)
+
+	ciphertext := make([]byte, aes.BlockSize+len(plaintext))
+	iv := ciphertext[:aes.BlockSize]
+	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
+		panic(err)
+	}
+
+	mode := cipher.NewCBCEncrypter(block, iv)
+	mode.CryptBlocks(ciphertext[aes.BlockSize:], plaintext)
+
+	return ciphertext
+}
+
+// ECBEncrypter encrypt a message with a key using ECB mod
+func ECBEncrypter(key, plaintext []byte) []byte {
+	block, _ := aes.NewCipher(key)
+
+	ciphertext := make([]byte, aes.BlockSize+len(plaintext))
+	iv := ciphertext[:aes.BlockSize]
+	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
+		panic(err)
+	}
+
+	mode := cipher.NewCBCEncrypter(block, iv)
+	mode.CryptBlocks(ciphertext[aes.BlockSize:], plaintext)
+
+	return ciphertext
+}
+
+/*
+func DecryptECB(cipherText []byte, key []byte, block_size int) []byte {
+	cipher, _ := aes.NewCipher([]byte(key))
+	decrypted := make([]byte, len(cipherText))
+
+	for bs, be := 0, block_size; bs < len(cipherText); bs, be = bs+block_size, be+block_size {
+		cipher.Decrypt(decrypted[bs:be], cipherText[bs:be])
+	}
+	return decrypted
+}*/

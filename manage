@@ -15,14 +15,15 @@ run () {
   test_ > /dev/null && go run Manager.go $current
 }
 
-test_ () {
-  go test ./solutions
+build () {
+  test_
+  go build -o registry cmd/registry/main.go
 }
 
-less_ () {
-  current=$(get_current_job)
-  doc_name=`echo "$current" | sed "s/.go/.md/g;s/\.\//^/g;s/\//\/README./g;s/\^/\.\//g"`
-  less $doc_name
+test_ () {
+  go test ./pkg/lib
+  go test ./pkg/set1
+  #go test ./pkg/set2
 }
 
 list () {
@@ -39,8 +40,6 @@ then
 fi
 
 case "$command" in
-  l)
-    less_;;
   ls)
     list;;
   test)

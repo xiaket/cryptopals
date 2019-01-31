@@ -1,24 +1,23 @@
-package solutions
+package lib
 
-import "encoding/hex"
-import "testing"
+import (
+	"encoding/hex"
+	"github.com/stretchr/testify/assert"
+	"testing"
+)
 
 func TestHexToBase64(test *testing.T) {
 	const hex_string = "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d"
 	const expected = "SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t"
-	encoded := HexToBase64([]byte(hex_string))
-	if encoded != expected {
-		test.Errorf("Incorrect base64ed string: %s, want: %s.", encoded, expected)
-	}
+	encoded := string(HexToBase64([]byte(hex_string)))
+	assert.Equal(test, encoded, expected, "Incorrect base64ed string: %s, want: %s.", encoded, expected)
 }
 
 func TestHammingDistance(test *testing.T) {
 	const message1 = "this is a test"
 	const message2 = "wokka wokka!!!"
-	hamming_distance := HammingDistance([]byte(message1), []byte(message2))
-	if hamming_distance != 37 {
-		test.Errorf("Incorrect Hamming Distance: %d, want: %d.", hamming_distance, 37)
-	}
+	d := HammingDistance([]byte(message1), []byte(message2))
+	assert.Equal(test, d, 37, "Incorrect Hamming Distance: %d, want: %d.", d, 37)
 }
 
 func TestProb3(test *testing.T) {
@@ -28,9 +27,7 @@ func TestProb3(test *testing.T) {
 	n, _ := hex.Decode(unhexed, []byte(message))
 	unhexed_ := unhexed[:n]
 	_, guess := DecryptSingleByteXOR([]byte(unhexed_))
-	if string(guess) != expected {
-		test.Errorf("Incorrect guess result: %s, want: %s.", string(guess), expected)
-	}
+	assert.Equal(test, expected, string(guess), "Incorrect guess result: %s, want: %s.", string(guess), expected)
 }
 
 func TestPKCS7Padding(test *testing.T) {
