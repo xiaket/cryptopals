@@ -26,9 +26,7 @@ func TestProb5(test *testing.T) {
 	const key = "ICE"
 	const expected = "0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a26226324272765272a282b2f20690a652e2c652a3124333a653e2b2027630c692b20283165286326302e27282f"
 	encoded := prob5(message, key)
-	if encoded != expected {
-		test.Errorf("Incorrect encoded result: %s, want: %s.", encoded, expected)
-	}
+	assert.Equal(test, encoded, expected, "Incorrect encoded result: %s, want: %s.", encoded, expected)
 }
 
 func TestProb6(test *testing.T) {
@@ -36,9 +34,7 @@ func TestProb6(test *testing.T) {
 	const prefix = "I'm back and I'm ringin' the bell"
 	const length = 2876
 	guess, decoded := prob6()
-	if guess != expected {
-		test.Errorf("Incorrect key: %s, want: %s.", guess, expected)
-	}
+	assert.Equal(test, guess, expected, "Incorrect key: %s, want: %s.", guess, expected)
 	testutil.VerifyPrefixAndLength(decoded, prefix, length, test)
 }
 
@@ -52,7 +48,5 @@ func TestProb7(test *testing.T) {
 func TestProb8(test *testing.T) {
 	const prefix = "d880619740a8a19b7840a8"
 	found := prob8()
-	if !strings.HasPrefix(found, prefix) {
-		test.Errorf("Incorrect result: prefix %s, want: %s.", found[:len(prefix)], prefix)
-	}
+	assert.True(test, strings.HasPrefix(found, prefix), "Incorrect result: prefix %s, want: %s.", found[:len(prefix)], prefix)
 }

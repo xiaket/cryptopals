@@ -35,15 +35,11 @@ func TestPKCS7Padding(test *testing.T) {
 	expected4 := []byte{89, 69, 76, 76, 79, 87, 32, 83, 85, 66, 77, 65, 82, 73, 78, 69, 4, 4, 4, 4}
 	padded := PKCS7Padding([]byte(message), 20)
 	for i, ch := range expected4 {
-		if ch != padded[i] {
-			test.Errorf("Incorrect padded result in %d: %s, want: %s.", i, string(padded[i]), string(ch))
-		}
+		assert.Equal(test, ch, padded[i], "Incorrect padded result in %d: %s, want: %s.", i, string(padded[i]), string(ch))
 	}
 	expected8 := []byte{89, 69, 76, 76, 79, 87, 32, 83, 85, 66, 77, 65, 82, 73, 78, 69, 8, 8, 8, 8, 8, 8, 8, 8}
 	padded = PKCS7Padding([]byte(message), 24)
 	for i, ch := range expected8 {
-		if ch != padded[i] {
-			test.Errorf("Incorrect padded result in %d: %s, want: %s.", i, string(padded[i]), string(ch))
-		}
+		assert.Equal(test, ch, padded[i], "Incorrect padded result in %d: %s, want: %s.", i, string(padded[i]), string(ch))
 	}
 }
