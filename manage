@@ -13,7 +13,7 @@ run () {
 
 build () {
   test_
-  go build -o registry cmd/registry/main.go
+  go build -o Registry cmd/registry/main.go
 }
 
 test_ () {
