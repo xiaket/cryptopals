@@ -28,6 +28,10 @@ func prob10(key, iv []byte) []byte {
 }
 
 func Prob11() {
-	encrypted := lib.EncryptionOracle([]byte("This is the secret in plaintext."))
-	fmt.Println(encrypted)
+	// We do have a requirement on the text, it should have a certain amount of repetition in it.
+	for i := 0; i < 5; i++ {
+		encrypted, mode := lib.EncryptionOracle([]byte("YELLOW SUBMARINEYELLOW SUBMARINEYELLOW SUBMARINE"))
+		detected := lib.DetectionOracle(encrypted)
+		fmt.Println(mode, detected == mode)
+	}
 }

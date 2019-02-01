@@ -272,8 +272,8 @@ func EncryptCBC(message []byte, key []byte) []byte {
 }
 
 // EncryptionOracle is a function that generate a random key and encrypt data under it.
-func EncryptionOracle(msg []byte) []byte {
-	mode := ""
+func EncryptionOracle(msg []byte) ([]byte, string) {
+	var mode string
 	var CipherText []byte
 	key := GenerateKey(16)
 	msg = PadMessage(5, 10, msg)
@@ -286,22 +286,13 @@ func EncryptionOracle(msg []byte) []byte {
 		mode = "CBC"
 		CipherText = EncryptCBC(msg, key)
 	}
-	fmt.Println("use ", mode)
-	return CipherText
+	return CipherText, mode
 }
 
-// CBCEncrypter encrypt a message with a key using CBC mod
-func CBCEncrypter(key, plaintext []byte) []byte {
-	block, _ := aes.NewCipher(key)
-
-	ciphertext := make([]byte, aes.BlockSize+len(plaintext))
-	iv := ciphertext[:aes.BlockSize]
-	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
-		panic(err)
+func DetectionOracle(msg []byte) string {
+	if DetectECB(msg) {
+		return "ECB"
+	} else {
+		return "CBC"
 	}
-
-	mode := cipher.NewCBCEncrypter(block, iv)
-	mode.CryptBlocks(ciphertext[aes.BlockSize:], plaintext)
-
-	return ciphertext
 }

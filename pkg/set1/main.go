@@ -123,7 +123,8 @@ func prob8() string {
 	lines := lib.OpenFile("08")
 	var result string
 	for _, line := range lines {
-		if lib.DetectECB(string(line)) {
+		data, _ := lib.HexDecode(line)
+		if lib.DetectECB(data) {
 			result = string(line)
 		}
 	}
