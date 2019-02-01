@@ -1,11 +1,13 @@
 package set1
 
-import "bytes"
-import "encoding/base64"
-import "encoding/hex"
-import "fmt"
-import "math"
-import "github.com/xiaket/cryptopals/pkg/lib"
+import (
+	"bytes"
+	"encoding/base64"
+	"encoding/hex"
+	"fmt"
+	"github.com/xiaket/cryptopals/pkg/lib"
+	"math"
+)
 
 func Prob1() {
 	const hex_string = "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d"
@@ -21,12 +23,10 @@ func Prob2() {
 }
 
 func prob2(msg1, msg2 []byte) []byte {
-	bin1 := make([]byte, hex.DecodedLen(len(msg1)))
-	bin2 := make([]byte, hex.DecodedLen(len(msg2)))
-	hex.Decode(bin1, msg1)
-	hex.Decode(bin2, msg2)
+	bin1, n1 := lib.HexDecode(msg1)
+	bin2, _ := lib.HexDecode(msg2)
 
-	dst := make([]byte, len(bin1))
+	dst := make([]byte, n1)
 	lib.XORBytes(dst, bin1, bin2)
 
 	encoded := make([]byte, hex.EncodedLen(len(dst)))
@@ -36,8 +36,7 @@ func prob2(msg1, msg2 []byte) []byte {
 
 func Prob3() {
 	const message = "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736"
-	unhexed := make([]byte, hex.DecodedLen(len(message)))
-	n, _ := hex.Decode(unhexed, []byte(message))
+	unhexed, n := lib.HexDecode([]byte(message))
 	unhexed_ := unhexed[:n]
 	_, guess := lib.DecryptSingleByteXOR(unhexed_)
 	fmt.Println(string(guess))
@@ -54,8 +53,7 @@ func prob4() []byte {
 	var best_guess []byte
 
 	for _, line := range content {
-		unhexed := make([]byte, hex.DecodedLen(len(line)))
-		n, _ := hex.Decode(unhexed, line)
+		unhexed, n := lib.HexDecode(line)
 		for suspect := 32; suspect < 128; suspect++ {
 			dst := make([]byte, n)
 			lib.XORByte(dst, unhexed[:n], byte(suspect))
@@ -82,24 +80,6 @@ func prob5(message, key string) string {
 	return hex.EncodeToString(xored)
 }
 
-func transpose(blocks [][]byte, keysize int) [][]byte {
-	remains := len(blocks[len(blocks)-1])
-	transposed := make([][]byte, keysize)
-	for i := range transposed {
-		if i < remains {
-			transposed[i] = make([]byte, len(blocks))
-		} else {
-			transposed[i] = make([]byte, len(blocks)-1)
-		}
-	}
-	for i, block := range blocks {
-		for j, byte_ := range block {
-			transposed[j][i] = byte_
-		}
-	}
-	return transposed
-}
-
 func prob6() (string, string) {
 	content := string(bytes.Join(lib.OpenFile("06"), []byte("")))
 	data, _ := base64.StdEncoding.DecodeString(content)
@@ -110,7 +90,7 @@ func prob6() (string, string) {
 		upper_limit := int(math.Min(float64((i+1)*keysize), float64(len(data))))
 		blocks = append(blocks, data[i*keysize:upper_limit])
 	}
-	transposed := transpose(blocks, keysize)
+	transposed := lib.Transpose(blocks, keysize)
 
 	var encryption_key string
 	for i := range transposed {

@@ -1,13 +1,16 @@
-package solutions
+package set2
 
-import "bytes"
-import "crypto/aes"
-import "encoding/base64"
-import "fmt"
+import (
+	"bytes"
+	"crypto/aes"
+	"encoding/base64"
+	"fmt"
+	"github.com/xiaket/cryptopals/pkg/lib"
+)
 
 func Prob9() {
 	const message = "YELLOW SUBMARINE"
-	padded := PKCS7Padding([]byte(message), 20)
+	padded := lib.PKCS7Padding([]byte(message), 20)
 	fmt.Println(padded)
 }
 
@@ -19,12 +22,12 @@ func Prob10() {
 }
 
 func prob10(key, iv []byte) []byte {
-	content := string(bytes.Join(OpenFile("10"), []byte("")))
+	content := string(bytes.Join(lib.OpenFile("10"), []byte("")))
 	cipherText, _ := base64.StdEncoding.DecodeString(content)
-	return DecryptCBC(cipherText, key, iv)
+	return lib.DecryptCBC(cipherText, key, iv)
 }
 
 func Prob11() {
-	encrypted := EncryptionOracle([]byte("This is the secret in plaintext."))
+	encrypted := lib.EncryptionOracle([]byte("This is the secret in plaintext."))
 	fmt.Println(encrypted)
 }

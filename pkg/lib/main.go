@@ -1,18 +1,32 @@
 package lib
 
-import "bufio"
-import "bytes"
-import "crypto/aes"
-import "crypto/cipher"
-import "crypto/rand"
-import "encoding/hex"
-import "encoding/base64"
-import "fmt"
-import "io"
-import mrand "math/rand"
-import "math/big"
-import "os"
-import "path/filepath"
+import (
+	"bufio"
+	"bytes"
+	"crypto/aes"
+	"crypto/cipher"
+	"crypto/rand"
+	"encoding/base64"
+	"encoding/hex"
+	"fmt"
+	"io"
+	"math/big"
+	mrand "math/rand"
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+)
+
+// Testing utils
+func VerifyPrefixAndLength(str string, prefix string, length int, test *testing.T) {
+	if !strings.HasPrefix(str, prefix) {
+		test.Errorf("Incorrect result: prefix %s, want: %s.", str[:len(prefix)], prefix)
+	}
+	if len(str) != length {
+		test.Errorf("Incorrect result: length %d, want: %d.", len(str), length)
+	}
+}
 
 // Common utils used by all problem sets.
 
@@ -114,19 +128,44 @@ func DecryptECB(cipherText []byte, key []byte, block_size int) []byte {
 // DecryptSingleByteXOR will decrypt an array of bytes encrypted using
 // single byte xor
 func DecryptSingleByteXOR(message []byte) (byte, []byte) {
-	var best_guess byte
-	dst := make([]byte, len(message))
+	var char byte
+	guess := make([]byte, len(message))
 	max := -1.0
 	for suspect := 1; suspect < 128; suspect++ {
-		XORByte(dst, message, byte(suspect))
-		rating := CalcRating(dst)
+		XORByte(guess, message, byte(suspect))
+		rating := CalcRating(guess)
 		if rating > max {
 			max = rating
-			best_guess = byte(suspect)
+			char = byte(suspect)
 		}
 	}
-	XORByte(dst, message, best_guess)
-	return best_guess, dst
+	XORByte(guess, message, char)
+	return char, guess
+}
+
+func Transpose(blocks [][]byte, keysize int) [][]byte {
+	remains := len(blocks[len(blocks)-1])
+	transposed := make([][]byte, keysize)
+	for i := range transposed {
+		if i < remains {
+			transposed[i] = make([]byte, len(blocks))
+		} else {
+			transposed[i] = make([]byte, len(blocks)-1)
+		}
+	}
+	for i, block := range blocks {
+		for j, byte_ := range block {
+			transposed[j][i] = byte_
+		}
+	}
+	return transposed
+}
+
+// Decode a hex buffer. return the decoded message and the count of bytes in the decoded message.
+func HexDecode(message []byte) ([]byte, int) {
+	decoded := make([]byte, hex.DecodedLen(len(message)))
+	n, _ := hex.Decode(decoded, []byte(message))
+	return decoded, n
 }
 
 // DetectECB will detect whether an hex encoded string is encrypted with ECB
@@ -187,8 +226,7 @@ func HammingDistance(message1, message2 []byte) int {
 
 // HexToBase64 encode a byte array in hex using base64.
 func HexToBase64(hex_bytes []byte) []byte {
-	bin := make([]byte, hex.DecodedLen(len(hex_bytes)))
-	hex.Decode(bin, hex_bytes)
+	bin, _ := HexDecode(hex_bytes)
 	dst := make([]byte, base64.StdEncoding.EncodedLen(len(bin)))
 	base64.StdEncoding.Encode(dst, bin)
 	return dst

@@ -1,6 +1,10 @@
-package solutions
+package set2
 
-import "testing"
+import (
+	//"github.com/stretchr/testify/assert"
+	"github.com/xiaket/cryptopals/pkg/lib"
+	"testing"
+)
 
 func TestProb10(test *testing.T) {
 	const key = "YELLOW SUBMARINE"
@@ -8,5 +12,5 @@ func TestProb10(test *testing.T) {
 	const length = 2880
 	iv := make([]byte, 16)
 	decrypted := prob10([]byte(key), iv)
-	verifyPrefixAndLength(string(decrypted), prefix, length, test)
+	lib.VerifyPrefixAndLength(string(decrypted), prefix, length, test)
 }
