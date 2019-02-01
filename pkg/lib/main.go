@@ -14,6 +14,7 @@ import (
 	mrand "math/rand"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 // Common utils used by all problem sets.
@@ -101,18 +102,6 @@ func CalcRating(msg []byte) float64 {
 	return rating / float64(len(msg))
 }
 
-// DecryptECB will decrypt text encrypted using a AES-128 running ECB mode using
-// a provided key.
-func DecryptECB(cipherText []byte, key []byte, block_size int) []byte {
-	cipher, _ := aes.NewCipher([]byte(key))
-	decrypted := make([]byte, len(cipherText))
-
-	for bs, be := 0, block_size; bs < len(cipherText); bs, be = bs+block_size, be+block_size {
-		cipher.Decrypt(decrypted[bs:be], cipherText[bs:be])
-	}
-	return decrypted
-}
-
 // DecryptSingleByteXOR will decrypt an array of bytes encrypted using
 // single byte xor
 func DecryptSingleByteXOR(message []byte) (byte, []byte) {
@@ -154,29 +143,6 @@ func HexDecode(message []byte) ([]byte, int) {
 	decoded := make([]byte, hex.DecodedLen(len(message)))
 	n, _ := hex.Decode(decoded, []byte(message))
 	return decoded, n
-}
-
-// DetectECB will detect whether an hex encoded string is encrypted with ECB
-func DetectECB(line string) bool {
-	// a hex string represents 4 bits, so 16 * 8 / 4 = 32 hex chars will
-	// represent a 16 bytes trunk
-	trunks := make([]string, len(line)/32)
-	duplication := 0
-	for i := 0; i < len(line)/32; i++ {
-		trunk := line[i*32 : (i+1)*32]
-		found := false
-		for _, item := range trunks {
-			if item == trunk {
-				found = true
-			}
-		}
-		if found {
-			duplication += 1
-		} else {
-			trunks = append(trunks, trunk)
-		}
-	}
-	return float64(duplication)/float64(len(line)/32) > 0.1
 }
 
 // FindKeySize will find the key size in ciphertext protected using
@@ -275,24 +241,21 @@ func PKCS7Padding(msg []byte, length int) []byte {
 	return msg
 }
 
-// PadMessage will padding a message as bytes with random bytes.
-func PadMessage(prefix, suffix int, message []byte) []byte {
-	seed, _ := rand.Int(rand.Reader, big.NewInt(1000000))
-	mrand.Seed(seed.Int64())
-	padding_left := mrand.Intn(prefix + 1)
-	padding_right := mrand.Intn(suffix + 1)
-	message = append(GenerateKey(padding_left+prefix), message...)
-	return append(message, GenerateKey(padding_right+suffix)...)
+// Return a random int in the range [start, end)
+// Based on math/rand, not crypto safe.
+func RandInt(start, end int) int {
+	r := mrand.New(mrand.NewSource(time.Now().UnixNano()))
+	return r.Intn(end-start) + start
 }
 
-// EncryptECB will encrypt a message using ECB with a key and return it
-func EncryptECB(message []byte, key []byte) []byte {
-	block, _ := aes.NewCipher(key)
-
-	ciphertext := make([]byte, len(message))
-	mode := NewECBEncrypter(block)
-	mode.CryptBlocks(ciphertext, message)
-	return ciphertext
+// PadMessage will padding a message as bytes with random bytes.
+func PadMessage(paddingMin, paddingMax int, message []byte) []byte {
+	seed, _ := rand.Int(rand.Reader, big.NewInt(1000000))
+	mrand.Seed(seed.Int64())
+	paddingLeft := RandInt(paddingMin, paddingMax)
+	paddingRight := RandInt(paddingMin, paddingMax)
+	message = append(GenerateKey(paddingLeft), message...)
+	return append(message, GenerateKey(paddingRight)...)
 }
 
 // EncryptCBC will encrypt a message using CBC with a key and an IV and return it
@@ -313,12 +276,10 @@ func EncryptionOracle(msg []byte) []byte {
 	mode := ""
 	var CipherText []byte
 	key := GenerateKey(16)
-	msg = PadMessage(5, 5, msg)
+	msg = PadMessage(5, 10, msg)
 	msg = PKCS7Padding(msg, aes.BlockSize)
 
-	seed, _ := rand.Int(rand.Reader, big.NewInt(1000000))
-	mrand.Seed(seed.Int64())
-	if mrand.Intn(2) == 1 {
+	if RandInt(0, 2) == 1 {
 		mode = "ECB"
 		CipherText = EncryptECB(msg, key)
 	} else {
@@ -327,42 +288,6 @@ func EncryptionOracle(msg []byte) []byte {
 	}
 	fmt.Println("use ", mode)
 	return CipherText
-}
-
-type ecb struct {
-	b         cipher.Block
-	blockSize int
-}
-
-func newECB(b cipher.Block) *ecb {
-	return &ecb{
-		b:         b,
-		blockSize: b.BlockSize(),
-	}
-}
-
-type ecbEncrypter ecb
-
-// NewECBEncrypter returns a BlockMode which encrypts in electronic code book
-// mode, using the given Block.
-func NewECBEncrypter(b cipher.Block) cipher.BlockMode {
-	return (*ecbEncrypter)(newECB(b))
-}
-
-func (x *ecbEncrypter) BlockSize() int { return x.blockSize }
-
-func (x *ecbEncrypter) CryptBlocks(dst, src []byte) {
-	if len(src)%x.blockSize != 0 {
-		panic("crypto/cipher: input not full blocks")
-	}
-	if len(dst) < len(src) {
-		panic("crypto/cipher: output smaller than input")
-	}
-	for len(src) > 0 {
-		x.b.Encrypt(dst, src[:x.blockSize])
-		src = src[x.blockSize:]
-		dst = dst[x.blockSize:]
-	}
 }
 
 // CBCEncrypter encrypt a message with a key using CBC mod
@@ -380,30 +305,3 @@ func CBCEncrypter(key, plaintext []byte) []byte {
 
 	return ciphertext
 }
-
-// ECBEncrypter encrypt a message with a key using ECB mod
-func ECBEncrypter(key, plaintext []byte) []byte {
-	block, _ := aes.NewCipher(key)
-
-	ciphertext := make([]byte, aes.BlockSize+len(plaintext))
-	iv := ciphertext[:aes.BlockSize]
-	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
-		panic(err)
-	}
-
-	mode := cipher.NewCBCEncrypter(block, iv)
-	mode.CryptBlocks(ciphertext[aes.BlockSize:], plaintext)
-
-	return ciphertext
-}
-
-/*
-func DecryptECB(cipherText []byte, key []byte, block_size int) []byte {
-	cipher, _ := aes.NewCipher([]byte(key))
-	decrypted := make([]byte, len(cipherText))
-
-	for bs, be := 0, block_size; bs < len(cipherText); bs, be = bs+block_size, be+block_size {
-		cipher.Decrypt(decrypted[bs:be], cipherText[bs:be])
-	}
-	return decrypted
-}*/
