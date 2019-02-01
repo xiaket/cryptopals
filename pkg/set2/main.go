@@ -5,6 +5,7 @@ import (
 	"crypto/aes"
 	"encoding/base64"
 	"fmt"
+	"github.com/deckarep/golang-set"
 	"github.com/xiaket/cryptopals/pkg/lib"
 )
 
@@ -29,9 +30,17 @@ func prob10(key, iv []byte) []byte {
 
 func Prob11() {
 	// We do have a requirement on the text, it should have a certain amount of repetition in it.
-	for i := 0; i < 5; i++ {
+	required := mapset.NewSetFromSlice([]interface{}{"ECB", "CBC"})
+	recorded := mapset.NewSet()
+	for true {
 		encrypted, mode := lib.EncryptionOracle([]byte("YELLOW SUBMARINEYELLOW SUBMARINEYELLOW SUBMARINE"))
 		detected := lib.DetectionOracle(encrypted)
-		fmt.Println(mode, detected == mode)
+		if detected != mode {
+			panic("detection failed")
+		}
+		recorded.Add(mode)
+		if recorded.Equal(required) {
+			break
+		}
 	}
 }

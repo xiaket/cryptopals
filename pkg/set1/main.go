@@ -121,14 +121,13 @@ func Prob7() {
 
 func prob8() string {
 	lines := lib.OpenFile("08")
-	var result string
 	for _, line := range lines {
 		data, _ := lib.HexDecode(line)
 		if lib.DetectECB(data) {
-			result = string(line)
+			return string(line)
 		}
 	}
-	return result
+	panic("Failed to find target.")
 }
 
 func Prob8() {
