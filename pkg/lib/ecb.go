@@ -10,25 +10,17 @@ import (
 
 // DetectECB will detect whether an byte array is encrypted with ECB
 func DetectECB(data []byte) bool {
-	// a hex string represents 4 bits, so 16 * 8 / 4 = 32 hex chars will
-	// represent a 16 bytes trunk
 	trunks := make([][]byte, len(data)/16)
-	duplication := 0
 	for i := 0; i < len(data)/16; i++ {
 		trunk := data[i*16 : (i+1)*16]
-		found := false
 		for _, item := range trunks {
 			if bytes.Equal(item, trunk) {
-				found = true
+				return true
 			}
 		}
-		if found {
-			duplication += 1
-		} else {
-			trunks = append(trunks, trunk)
-		}
+		trunks = append(trunks, trunk)
 	}
-	return float64(duplication)/float64(len(data)/16) > 0.1
+	return false
 }
 
 // DecryptECB will decrypt text encrypted using a AES-128 running ECB mode using
