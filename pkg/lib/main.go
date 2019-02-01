@@ -14,19 +14,7 @@ import (
 	mrand "math/rand"
 	"os"
 	"path/filepath"
-	"strings"
-	"testing"
 )
-
-// Testing utils
-func VerifyPrefixAndLength(str string, prefix string, length int, test *testing.T) {
-	if !strings.HasPrefix(str, prefix) {
-		test.Errorf("Incorrect result: prefix %s, want: %s.", str[:len(prefix)], prefix)
-	}
-	if len(str) != length {
-		test.Errorf("Incorrect result: length %d, want: %d.", len(str), length)
-	}
-}
 
 // Common utils used by all problem sets.
 

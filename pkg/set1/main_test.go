@@ -2,7 +2,7 @@ package set1
 
 import (
 	"github.com/stretchr/testify/assert"
-	"github.com/xiaket/cryptopals/pkg/lib"
+	"github.com/xiaket/cryptopals/pkg/testutil"
 	"strings"
 	"testing"
 )
@@ -39,14 +39,14 @@ func TestProb6(test *testing.T) {
 	if guess != expected {
 		test.Errorf("Incorrect key: %s, want: %s.", guess, expected)
 	}
-	lib.VerifyPrefixAndLength(decoded, prefix, length, test)
+	testutil.VerifyPrefixAndLength(decoded, prefix, length, test)
 }
 
 func TestProb7(test *testing.T) {
 	const prefix = "I'm back and I'm ringin' the bell"
 	const length = 2880
 	decrypted := prob7([]byte("YELLOW SUBMARINE"), 16)
-	lib.VerifyPrefixAndLength(decrypted, prefix, length, test)
+	testutil.VerifyPrefixAndLength(decrypted, prefix, length, test)
 }
 
 func TestProb8(test *testing.T) {
