@@ -44,3 +44,14 @@ func Prob11() {
 		}
 	}
 }
+
+func Prob12() {
+	key := lib.GenerateKey(16)
+	unknownSrc := "Um9sbGluJyBpbiBteSA1LjAKV2l0aCBteSByYWctdG9wIGRvd24gc28gbXkgaGFpciBjYW4gYmxvdwpUaGUgZ2lybGllcyBvbiBzdGFuZGJ5IHdhdmluZyBqdXN0IHRvIHNheSBoaQpEaWQgeW91IHN0b3A/IE5vLCBJIGp1c3QgZHJvdmUgYnkK"
+	unknown, _ := base64.StdEncoding.DecodeString(unknownSrc)
+	encrypt := func(payload []byte) []byte {
+		message := append(payload, unknown...)
+		return lib.EncryptECB(lib.PKCS7Padding(message, 16), key)
+	}
+	lib.AttackECB(encrypt)
+}

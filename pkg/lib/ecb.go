@@ -5,8 +5,39 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
+	"errors"
+	"fmt"
 	"io"
+	"strings"
 )
+
+type fn func([]byte) []byte
+
+// AttackECB will decipher a string encrypted by AES-ECB without the encryption key.
+func AttackECB(encrypt fn) []byte {
+	blockSize, _ := DetectBlockSize(encrypt)
+	return []byte("null")
+}
+
+func AttachNextByte(size int, suffix []byte, encrypt fn) byte {
+	return []byte(" ")
+}
+
+// Detect block size for data encrypted with AES-ECB
+func DetectBlockSize(encrypt fn) (int, error) {
+	for i := 0; i < 1024; i++ {
+		payload := []byte(strings.Repeat("T", i))
+		if DetectECB(encrypt(payload)) {
+			if i%2 == 0 {
+				return i / 2, nil
+			} else {
+				// We are lucky, we got the first byte right.
+				return (i + 1) / 2, nil
+			}
+		}
+	}
+	return -1, errors.New("Failed to determine")
+}
 
 // DetectECB will detect whether an byte array is encrypted with ECB
 func DetectECB(data []byte) bool {
@@ -25,11 +56,11 @@ func DetectECB(data []byte) bool {
 
 // DecryptECB will decrypt text encrypted using a AES-128 running ECB mode using
 // a provided key.
-func DecryptECB(cipherText []byte, key []byte, block_size int) []byte {
+func DecryptECB(cipherText []byte, key []byte, blockSize int) []byte {
 	cipher, _ := aes.NewCipher([]byte(key))
 	decrypted := make([]byte, len(cipherText))
 
-	for bs, be := 0, block_size; bs < len(cipherText); bs, be = bs+block_size, be+block_size {
+	for bs, be := 0, blockSize; bs < len(cipherText); bs, be = bs+blockSize, be+blockSize {
 		cipher.Decrypt(decrypted[bs:be], cipherText[bs:be])
 	}
 	return decrypted

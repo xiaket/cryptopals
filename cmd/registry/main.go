@@ -19,6 +19,7 @@ func main() {
 		"9":  set2.Prob9,
 		"10": set2.Prob10,
 		"11": set2.Prob11,
+		"12": set2.Prob12,
 	}
 	registry[os.Args[1]]()
 }
