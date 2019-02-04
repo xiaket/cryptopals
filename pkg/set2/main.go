@@ -47,7 +47,9 @@ func Prob11() {
 
 func Prob12() {
 	key := lib.GenerateKey(16)
-	unknownSrc := "Um9sbGluJyBpbiBteSA1LjAKV2l0aCBteSByYWctdG9wIGRvd24gc28gbXkgaGFpciBjYW4gYmxvdwpUaGUgZ2lybGllcyBvbiBzdGFuZGJ5IHdhdmluZyBqdXN0IHRvIHNheSBoaQpEaWQgeW91IHN0b3A/IE5vLCBJIGp1c3QgZHJvdmUgYnkK"
+	// unknownSrc := "Um9sbGluJyBpbiBteSA1LjAKV2l0aCBteSByYWctdG9wIGRvd24gc28gbXkgaGFpciBjYW4gYmxvdwpUaGUgZ2lybGllcyBvbiBzdGFuZGJ5IHdhdmluZyBqdXN0IHRvIHNheSBoaQpEaWQgeW91IHN0b3A/IE5vLCBJIGp1c3QgZHJvdmUgYnkK"
+	// mock payload from movie quotes
+	unknownSrc := "R29vZCBtb3JuaW5nLiBJbiBsZXNzIHRoYW4gYW4gaG91ciwgYWlyY3JhZnQgZnJvbSBoZXJlIHdpbGwgam9pbiBvdGhlcnMgZnJvbSBhcm91bmQgdGhlIHdvcmxkLiBBbmQgeW91IHdpbGwgYmUgbGF1bmNoaW5nIHRoZSBsYXJnZXN0IGFlcmlhbCBiYXR0bGUgaW4gdGhpcyBoaXN0b3J5IG9mIG1hbmtpbmQuIE1hbmtpbmQgLS0gdGhhdCB3b3JkIHNob3VsZCBoYXZlIG5ldyBtZWFuaW5nIGZvciBhbGwgb2YgdXMgdG9kYXkuIFdlIGNhbid0IGJlIGNvbnN1bWVkIGJ5IG91ciBwZXR0eSBkaWZmZXJlbmNlcyBhbnltb3JlLiBXZSB3aWxsIGJlIHVuaXRlZCBpbiBvdXIgY29tbW9uIGludGVyZXN0cy4K"
 	unknown, _ := base64.StdEncoding.DecodeString(unknownSrc)
 	encrypt := func(payload []byte) []byte {
 		message := append(payload, unknown...)

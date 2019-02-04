@@ -16,11 +16,33 @@ type fn func([]byte) []byte
 // AttackECB will decipher a string encrypted by AES-ECB without the encryption key.
 func AttackECB(encrypt fn) []byte {
 	blockSize, _ := DetectBlockSize(encrypt)
+	victims := []byte("")
+	for i := 0; i < 100; i++ {
+		next := AttachNextByte(blockSize, victims, encrypt)
+		victims = append(victims, next)
+		fmt.Println(string(victims))
+	}
 	return []byte("null")
 }
 
 func AttachNextByte(size int, suffix []byte, encrypt fn) byte {
-	return []byte(" ")
+	var common, payload []byte
+	if len(suffix) >= size {
+		common = suffix[:size-1]
+	} else {
+		common = bytes.Repeat([]byte("A"), size-1-len(suffix))
+	}
+	fmt.Println("common", common, len(common))
+	for i := 0; i < 256; i++ {
+		payload = []byte("")
+		payload = append(common, suffix...)
+		payload = append(payload, byte(i))
+		payload = append(payload, common...)
+		if DetectECB(encrypt(payload)) {
+			return byte(i)
+		}
+	}
+	return byte(35)
 }
 
 // Detect block size for data encrypted with AES-ECB
