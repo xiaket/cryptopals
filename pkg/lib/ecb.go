@@ -6,7 +6,6 @@ import (
 	"crypto/cipher"
 	"crypto/rand"
 	"errors"
-	"fmt"
 	"io"
 	"strings"
 )
@@ -17,32 +16,38 @@ type fn func([]byte) []byte
 func AttackECB(encrypt fn) []byte {
 	blockSize, _ := DetectBlockSize(encrypt)
 	victims := []byte("")
-	for i := 0; i < 100; i++ {
-		next := AttachNextByte(blockSize, victims, encrypt)
-		victims = append(victims, next)
-		fmt.Println(string(victims))
-	}
-	return []byte("null")
-}
-
-func AttachNextByte(size int, suffix []byte, encrypt fn) byte {
-	var common, payload []byte
-	if len(suffix) >= size {
-		common = suffix[:size-1]
-	} else {
-		common = bytes.Repeat([]byte("A"), size-1-len(suffix))
-	}
-	fmt.Println("common", common, len(common))
-	for i := 0; i < 256; i++ {
-		payload = []byte("")
-		payload = append(common, suffix...)
-		payload = append(payload, byte(i))
-		payload = append(payload, common...)
-		if DetectECB(encrypt(payload)) {
-			return byte(i)
+	for {
+		next, end := AttachNextByte(blockSize, victims, encrypt)
+		if end {
+			break
+		} else {
+			victims = append(victims, next)
 		}
 	}
-	return byte(35)
+	return victims
+}
+
+func AttachNextByte(size int, suffix []byte, encrypt fn) (byte, bool) {
+	var leftPadding, rightPadding, shim, payload []byte
+	padding := []byte("A")
+	if len(suffix) >= size {
+		leftPadding = []byte("")
+		shim = suffix[len(suffix)-15 : len(suffix)]
+		rightPadding = bytes.Repeat(padding, size-((len(suffix)-15)%size))
+	} else {
+		leftPadding = bytes.Repeat(padding, size-1-len(suffix))
+		shim = suffix
+		rightPadding = leftPadding
+	}
+	for i := 0; i < 256; i++ {
+		payload = append(leftPadding, shim...)
+		payload = append(payload, byte(i))
+		payload = append(payload, rightPadding...)
+		if DetectECB(encrypt(payload)) {
+			return byte(i), false
+		}
+	}
+	return byte(0), true
 }
 
 // Detect block size for data encrypted with AES-ECB
